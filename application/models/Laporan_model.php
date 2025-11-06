@@ -8,7 +8,7 @@ class Laporan_model extends CI_Model {
     $this->db->where('YEAR(tanggal)', $tahun);
 
     if ($kelas) {
-      $this->db->where('id_kelas', $kelas);
+      $this->db->where('kelas_asal_id', $kelas);
     }
     if ($jenis) {
       $this->db->where('jenis', $jenis);

@@ -44,7 +44,7 @@ class Laporan extends CI_Controller {
       $this->db->from('v_mutasi_detail');
       $this->db->where('tahun_ajaran', $tahun);
 
-      if (!empty($kelas)) $this->db->where('id_kelas', $kelas);
+      if (!empty($kelas)) $this->db->where('kelas_asal_id', $kelas);
       if (!empty($jenis)) $this->db->where('jenis', strtolower($jenis));
       if (!empty($search)) $this->db->like('nama_siswa', $search);
 
