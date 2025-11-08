@@ -1,3 +1,4 @@
+<?php if ($this->session->userdata('logged_in')): ?>
 <div class="text-center mt-4 mb-5">
   <h3>Selamat Datang, <?= $this->session->userdata('nama'); ?> 👋</h3>
   <p class="text-muted">
@@ -11,6 +12,8 @@
     </strong>
   </p>
 </div>
+<?php endif; ?>
+
 
 <div class="row g-4 mb-4">
   <!-- KELAS -->

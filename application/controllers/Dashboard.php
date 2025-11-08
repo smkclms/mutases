@@ -1,11 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Dashboard extends MY_Controller {
+class Dashboard extends CI_Controller { // <- gunakan CI_Controller agar tidak pakai filter dari MY_Controller
+  public function __construct() {
+    parent::__construct();
+    $this->load->database();
+  }
 
   public function index() {
     $data['title'] = 'Dashboard';
-    $data['active'] = 'dashboard';
 
     // ==========================================================
     // 🏫 JUMLAH ROMBEL PER TINGKAT
@@ -36,12 +39,19 @@ class Dashboard extends MY_Controller {
     $data['lulus'] = $query ? $query->result() : [];
 
     // ==========================================================
-    // LOAD VIEW
+    // TAMPILKAN SESUAI LOGIN
     // ==========================================================
-    $this->load->view('templates/header', $data);
-    $this->load->view('templates/sidebar', $data);
-    $this->load->view('dashboard/index', $data);
-    $this->load->view('templates/footer');
+    if ($this->session->userdata('logged_in')) {
+      // versi admin
+      $data['active'] = 'dashboard';
+      $this->load->view('templates/header', $data);
+      $this->load->view('templates/sidebar', $data);
+      $this->load->view('dashboard/index', $data);
+      $this->load->view('templates/footer');
+    } else {
+      // versi publik (tanpa sidebar, tanpa header login)
+      $this->load->view('dashboard/public', $data);
+    }
   }
 
   // ==========================================================
@@ -49,26 +59,18 @@ class Dashboard extends MY_Controller {
   // ==========================================================
   private function get_kelas_by_tingkat() {
     $result = [];
-
-    // Kelas X → hanya yang dimulai dengan 'X ' atau '10'
     $this->db->where("(nama REGEXP '(^X($|[^I])|^10)')");
     $result['x'] = $this->db->count_all_results('kelas');
-
-    // Kelas XI → hanya yang dimulai dengan 'XI' atau '11'
     $this->db->where("(nama REGEXP '(^XI($|[^I])|^11)')");
     $result['xi'] = $this->db->count_all_results('kelas');
-
-    // Kelas XII → hanya yang dimulai dengan 'XII' atau '12'
     $this->db->where("(nama REGEXP '(^XII|^12)')");
     $result['xii'] = $this->db->count_all_results('kelas');
-
     $result['total'] = $result['x'] + $result['xi'] + $result['xii'];
     return $result;
-}
-
+  }
 
   // ==========================================================
-  // 🔹 JUMLAH SISWA PER TINGKAT (untuk aktif / keluar)
+  // 🔹 JUMLAH SISWA PER TINGKAT
   // ==========================================================
   private function get_siswa_by_tingkat($status) {
     $result = [];
@@ -78,25 +80,23 @@ class Dashboard extends MY_Controller {
     if (is_array($status)) $this->db->where_in('siswa.status', $status);
     else $this->db->where('siswa.status', $status);
     $this->db->where("(kelas.nama REGEXP '(^X($|[^I])|^10)')");
-    $result['x'] = $this->db->count_all_results('siswa', TRUE); // 🔥 reset query builder
+    $result['x'] = $this->db->count_all_results('siswa', TRUE);
 
     // Kelas XI
     $this->db->join('kelas', 'kelas.id = siswa.id_kelas', 'left');
     if (is_array($status)) $this->db->where_in('siswa.status', $status);
     else $this->db->where('siswa.status', $status);
     $this->db->where("(kelas.nama REGEXP '(^XI($|[^I])|^11)')");
-    $result['xi'] = $this->db->count_all_results('siswa', TRUE); // 🔥 reset
+    $result['xi'] = $this->db->count_all_results('siswa', TRUE);
 
     // Kelas XII
     $this->db->join('kelas', 'kelas.id = siswa.id_kelas', 'left');
     if (is_array($status)) $this->db->where_in('siswa.status', $status);
     else $this->db->where('siswa.status', $status);
     $this->db->where("(kelas.nama REGEXP '(^XII|^12)')");
-    $result['xii'] = $this->db->count_all_results('siswa', TRUE); // 🔥 reset
+    $result['xii'] = $this->db->count_all_results('siswa', TRUE);
 
     $result['total'] = $result['x'] + $result['xi'] + $result['xii'];
     return $result;
-}
-
-
+  }
 }
