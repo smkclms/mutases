@@ -129,6 +129,10 @@ class Dashboard extends CI_Controller {
 
     $kelas = $this->db->get_where('kelas', ['id' => $kelas_id])->row();
     if (!$kelas) show_error('Data kelas tidak valid.');
+// 🔹 Tambahkan hitungan download
+    $this->db->set('download_count', 'download_count + 1', FALSE)
+             ->where('id', $kelas_id)
+             ->update('kelas');
 
     // Ambil data siswa aktif dari kelas ini
     $siswa = $this->db

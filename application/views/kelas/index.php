@@ -95,4 +95,38 @@
       </form>
     </div>
   </div>
+  <style>
+/* === Pagination Modern (Bootstrap 5 Style) === */
+.pagination .page-item .page-link {
+  color: #007bff;
+  border: 1px solid #dee2e6;
+  margin: 0 2px;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+.pagination .page-item .page-link:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+body.dark-mode .pagination .page-item .page-link {
+  background-color: #1f1f1f;
+  color: #ccc;
+  border-color: #333;
+}
+
+body.dark-mode .pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  color: #fff;
+}
+</style>
+
 </div>

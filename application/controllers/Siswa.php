@@ -10,45 +10,102 @@ class Siswa extends CI_Controller {
     $this->load->helper(['url', 'form']);
   }
 
-  public function index($offset = 0) {
+  public function index($offset = 0)
+{
     $this->load->library('pagination');
 
-    $this->db->where('status', 'aktif');
-    $config['base_url'] = site_url('siswa/index');
-    $config['total_rows'] = $this->db->count_all_results('siswa');
-    $config['per_page'] = 10;
-    $config['uri_segment'] = 3;
+    // 🔹 Ambil parameter filter dan pencarian dari GET
+    $kelas_id = $this->input->get('kelas');
+    $search   = $this->input->get('search');
+    $limit    = $this->input->get('limit') ?: 10;
 
-    $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
-    $config['full_tag_close'] = '</ul>';
-    $config['num_tag_open'] = '<li class="page-item"><span class="page-link">';
-    $config['num_tag_close'] = '</span></li>';
-    $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
-    $config['cur_tag_close'] = '</span></li>';
-    $config['next_link'] = '&raquo;';
-    $config['prev_link'] = '&laquo;';
+    // 🔹 Hitung total baris untuk pagination
+    $this->db->from('siswa');
+    $this->db->where('status', 'aktif');
+    if (!empty($kelas_id)) {
+        $this->db->where('id_kelas', $kelas_id);
+    }
+    if (!empty($search)) {
+        $this->db->group_start()
+                 ->like('nama', $search)
+                 ->or_like('nis', $search)
+                 ->or_like('nisn', $search)
+                 ->group_end();
+    }
+    $config['total_rows'] = $this->db->count_all_results();
+
+    // 🔹 Konfigurasi pagination
+    $config['base_url'] = site_url('siswa/index');
+    $config['per_page'] = $limit;
+    $config['uri_segment'] = 3;
+    $config['reuse_query_string'] = true;
+
+    // 💅 Bootstrap 5 pagination style
+$config['full_tag_open']   = '<nav><ul class="pagination pagination-sm justify-content-center my-3">';
+$config['full_tag_close']  = '</ul></nav>';
+$config['attributes']      = ['class' => 'page-link'];
+
+$config['first_link']      = '<i class="fas fa-angle-double-left"></i>';
+$config['first_tag_open']  = '<li class="page-item">';
+$config['first_tag_close'] = '</li>';
+
+$config['last_link']       = '<i class="fas fa-angle-double-right"></i>';
+$config['last_tag_open']   = '<li class="page-item">';
+$config['last_tag_close']  = '</li>';
+
+$config['next_link']       = '<i class="fas fa-angle-right"></i>';
+$config['next_tag_open']   = '<li class="page-item">';
+$config['next_tag_close']  = '</li>';
+
+$config['prev_link']       = '<i class="fas fa-angle-left"></i>';
+$config['prev_tag_open']   = '<li class="page-item">';
+$config['prev_tag_close']  = '</li>';
+
+$config['cur_tag_open']    = '<li class="page-item active"><a class="page-link bg-primary border-primary text-white" href="#">';
+$config['cur_tag_close']   = '</a></li>';
+
+$config['num_tag_open']    = '<li class="page-item">';
+$config['num_tag_close']   = '</li>';
+
+$config['reuse_query_string'] = true;
 
     $this->pagination->initialize($config);
 
+    // 🔹 Query utama siswa (dengan join dan filter)
     $this->db->select('siswa.*, kelas.nama AS nama_kelas, tahun_ajaran.tahun AS tahun_ajaran');
     $this->db->join('kelas', 'kelas.id = siswa.id_kelas', 'left');
     $this->db->join('tahun_ajaran', 'tahun_ajaran.id = siswa.tahun_id', 'left');
     $this->db->where('siswa.status', 'aktif');
+    if (!empty($kelas_id)) {
+        $this->db->where('siswa.id_kelas', $kelas_id);
+    }
+    if (!empty($search)) {
+        $this->db->group_start()
+                 ->like('siswa.nama', $search)
+                 ->or_like('siswa.nis', $search)
+                 ->or_like('siswa.nisn', $search)
+                 ->group_end();
+    }
     $this->db->order_by('siswa.id', 'DESC');
-    $data['siswa'] = $this->db->get('siswa', $config['per_page'], $offset)->result();
+    $data['siswa'] = $this->db->get('siswa', $limit, $offset)->result();
 
+    // 🔹 Data tambahan untuk tampilan
     $data['title'] = 'Data Siswa Aktif';
     $data['active'] = 'siswa';
     $data['pagination'] = $this->pagination->create_links();
     $data['kelas'] = $this->Siswa_model->get_kelas_list();
     $data['tahun'] = $this->Siswa_model->get_tahun_list();
     $data['start'] = $offset;
+    $data['kelas_id'] = $kelas_id;
+    $data['search'] = $search;
+    $data['limit'] = $limit;
 
     $this->load->view('templates/header', $data);
     $this->load->view('templates/sidebar', $data);
     $this->load->view('siswa/index', $data);
     $this->load->view('templates/footer');
-  }
+}
+
 
   // ========================================
   // TAMBAH SISWA

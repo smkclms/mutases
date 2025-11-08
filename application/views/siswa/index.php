@@ -32,6 +32,44 @@
 <?php endif; ?>
 
 
+<!-- 🔹 FILTER & PENCARIAN -->
+<form method="get" class="row mb-3">
+  <div class="col-md-3 col-sm-6 mb-2">
+    <select name="kelas" class="form-control form-control-sm">
+      <option value="">Semua Kelas</option>
+      <?php foreach($kelas as $k): ?>
+        <option value="<?= $k->id ?>" <?= ($kelas_id == $k->id ? 'selected' : '') ?>>
+          <?= $k->nama ?>
+        </option>
+      <?php endforeach; ?>
+    </select>
+  </div>
+
+  <div class="col-md-3 col-sm-6 mb-2">
+    <input type="text" name="search" value="<?= $search ?>" class="form-control form-control-sm" placeholder="Cari nama / NIS / NISN">
+  </div>
+
+  <div class="col-md-2 col-sm-6 mb-2">
+    <select name="limit" class="form-control form-control-sm">
+      <option value="10" <?= ($limit == 10 ? 'selected' : '') ?>>10</option>
+      <option value="20" <?= ($limit == 20 ? 'selected' : '') ?>>20</option>
+      <option value="50" <?= ($limit == 50 ? 'selected' : '') ?>>50</option>
+      <option value="100" <?= ($limit == 100 ? 'selected' : '') ?>>100</option>
+    </select>
+  </div>
+
+  <div class="col-md-2 col-sm-6 mb-2">
+    <button class="btn btn-primary btn-sm w-100">
+      <i class="fas fa-filter"></i> Terapkan
+    </button>
+  </div>
+
+  <div class="col-md-2 col-sm-6 mb-2">
+    <a href="<?= site_url('siswa') ?>" class="btn btn-secondary btn-sm w-100">
+      <i class="fas fa-sync-alt"></i> Reset
+    </a>
+  </div>
+</form>
 
 <table class="table table-bordered table-striped table-responsive-sm">
   <thead class="thead-light">
@@ -257,6 +295,41 @@
   border-color: #6c757d;
   font-weight: 600;
 }
+form.row.mb-3 select,
+form.row.mb-3 input {
+  border-radius: 6px;
+}
+.pagination .page-item .page-link {
+  color: #007bff;
+  border: 1px solid #dee2e6;
+  margin: 0 2px;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+.pagination .page-item .page-link:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+body.dark-mode .pagination .page-item .page-link {
+  background-color: #1f1f1f;
+  color: #ccc;
+  border-color: #333;
+}
+
+body.dark-mode .pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
 </style>
 
 </div>

@@ -220,50 +220,67 @@ body:not(.dark-mode) header .btn-toggle i.fa-moon {
             <th>L</th>
             <th>P</th>
             <th>Total</th>
-            <th>Download</th> <!-- 🆕 kolom baru -->
+            <th>Download</th>
+            <th>Jumlah Download</th>
           </tr>
         </thead>
         <tbody>
-          <?php 
-            $no = 1; 
-            $grand_total = 0; 
-            foreach($per_rombel as $r): 
-              $grand_total += $r->total;
+  <?php 
+    $no = 1; 
+    $grand_total = 0; 
+    if (!empty($per_rombel)):
+      foreach($per_rombel as $r):
+        $grand_total += $r->total;
+        // Ambil ID kelas berdasarkan nama (supaya bisa link ke controller)
+        $kelas = $this->db->get_where('kelas', ['nama' => $r->nama_kelas])->row();
+        $kelas_id = $kelas ? $kelas->id : 0;
 
-              // Ambil ID kelas berdasarkan nama (supaya bisa link ke controller)
-              $kelas = $this->db->get_where('kelas', ['nama' => $r->nama_kelas])->row();
-              $kelas_id = $kelas ? $kelas->id : 0;
-          ?>
-          <tr>
-            <td><?= $no++; ?></td>
-            <td class="text-start"><?= $r->nama_kelas; ?></td>
-            <td><?= $r->laki; ?></td>
-            <td><?= $r->perempuan; ?></td>
-            <td class="fw-bold"><?= $r->total; ?></td>
-            <td>
-              <?php if ($kelas_id): ?>
-                <a href="<?= base_url('index.php/dashboard/download_excel/'.$kelas_id) ?>" 
-                   class="btn btn-sm btn-success">
-                   <i class="fas fa-file-excel"></i> Download
-                </a>
-              <?php else: ?>
-                <span class="text-muted">-</span>
-              <?php endif; ?>
-            </td>
-          </tr>
-          <?php endforeach; ?>
+        // ambil jumlah download dari record kelas (safe)
+        $kelas_data = $kelas ? $kelas : null;
+        $count = ($kelas_data && isset($kelas_data->download_count)) ? (int)$kelas_data->download_count : 0;
+  ?>
+    <tr>
+      <td><?= $no++; ?></td>
+      <td class="text-start"><?= $r->nama_kelas; ?></td>
+      <td><?= $r->laki; ?></td>
+      <td><?= $r->perempuan; ?></td>
+      <td class="fw-bold"><?= $r->total; ?></td>
 
-          <?php if(empty($per_rombel)): ?>
-          <tr>
-            <td colspan="6" class="text-muted">Belum ada data siswa aktif.</td>
-          </tr>
-          <?php else: ?>
-          <tr class="table-secondary fw-bold">
-            <td colspan="5" class="text-end">Jumlah Keseluruhan</td>
-            <td><?= $grand_total; ?></td>
-          </tr>
-          <?php endif; ?>
-        </tbody>
+      <!-- tombol download -->
+      <td>
+        <?php if ($kelas_id): ?>
+          <a href="<?= base_url('index.php/dashboard/download_excel/'.$kelas_id) ?>" 
+             class="btn btn-sm btn-success">
+             <i class="fas fa-file-excel"></i> Download
+          </a>
+        <?php else: ?>
+          <span class="text-muted">-</span>
+        <?php endif; ?>
+      </td>
+
+      <!-- jumlah download -->
+      <td>
+        <?= $count > 0 ? $count . 'x download' : '-' ?>
+      </td>
+    </tr>
+  <?php 
+      endforeach;
+    else:
+  ?>
+    <tr>
+      <td colspan="7" class="text-center text-muted">Belum ada data siswa aktif.</td>
+    </tr>
+  <?php endif; ?>
+
+  <?php if(!empty($per_rombel)): ?>
+    <tr class="table-secondary fw-bold">
+      <td colspan="5" class="text-end">Jumlah Keseluruhan</td>
+      <td><?= $grand_total; ?></td>
+      <td></td> <!-- kosongkan sel terakhir agar kolom tetap rapi -->
+    </tr>
+  <?php endif; ?>
+</tbody>
+
       </table>
     </div>
   </div>

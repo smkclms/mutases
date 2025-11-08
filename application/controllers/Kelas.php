@@ -18,14 +18,35 @@ class Kelas extends CI_Controller {
     $config['per_page'] = 10;
     $config['uri_segment'] = 3;
 
-    $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
-    $config['full_tag_close'] = '</ul>';
-    $config['num_tag_open'] = '<li class="page-item"><span class="page-link">';
-    $config['num_tag_close'] = '</span></li>';
-    $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
-    $config['cur_tag_close'] = '</span></li>';
-    $config['next_link'] = '&raquo;';
-    $config['prev_link'] = '&laquo;';
+    // 💅 Pagination Styling (Bootstrap 5)
+$config['full_tag_open']   = '<nav><ul class="pagination pagination-sm justify-content-center my-3">';
+$config['full_tag_close']  = '</ul></nav>';
+$config['attributes']      = ['class' => 'page-link'];
+
+$config['first_link']      = '<i class="fas fa-angle-double-left"></i>';
+$config['first_tag_open']  = '<li class="page-item">';
+$config['first_tag_close'] = '</li>';
+
+$config['last_link']       = '<i class="fas fa-angle-double-right"></i>';
+$config['last_tag_open']   = '<li class="page-item">';
+$config['last_tag_close']  = '</li>';
+
+$config['next_link']       = '<i class="fas fa-angle-right"></i>';
+$config['next_tag_open']   = '<li class="page-item">';
+$config['next_tag_close']  = '</li>';
+
+$config['prev_link']       = '<i class="fas fa-angle-left"></i>';
+$config['prev_tag_open']   = '<li class="page-item">';
+$config['prev_tag_close']  = '</li>';
+
+$config['cur_tag_open']    = '<li class="page-item active"><a class="page-link bg-primary border-primary text-white" href="#">';
+$config['cur_tag_close']   = '</a></li>';
+
+$config['num_tag_open']    = '<li class="page-item">';
+$config['num_tag_close']   = '</li>';
+
+$config['reuse_query_string'] = true;
+
 
     $this->pagination->initialize($config);
 
