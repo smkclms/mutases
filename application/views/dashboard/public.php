@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard Mutasi Siswa</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
@@ -22,6 +23,7 @@
       color: var(--text-light);
       font-family: 'Segoe UI', sans-serif;
       transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
     }
 
     body.dark-mode {
@@ -32,28 +34,32 @@
     header {
       background: linear-gradient(90deg, #007bff, #00bcd4);
       color: #fff;
-      padding: 1rem 0;
+      padding: .8rem 0;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     header .brand {
       font-weight: 700;
-      font-size: 1.4rem;
-      letter-spacing: .5px;
+      font-size: 1.2rem;
+      letter-spacing: .3px;
     }
 
     header .actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     header a.btn-login {
       color: #007bff;
       background: #fff;
       border-radius: 50px;
-      padding: .5rem 1.2rem;
+      padding: .4rem 1rem;
       font-weight: 500;
+      font-size: .9rem;
       transition: 0.3s;
     }
 
@@ -63,21 +69,37 @@
     }
 
     header .btn-toggle {
-      background: #fff;
-      border: none;
-      border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
 
     header .btn-toggle:hover {
-      background: #e2e6ea;
-    }
+  background: rgba(255, 255, 255, 0.5);
+  transform: rotate(20deg);
+}
+header .btn-toggle i {
+  font-size: 1.1rem;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+body.dark-mode header .btn-toggle i.fa-sun {
+  color: #ffeb3b; /* kuning matahari */
+}
+
+body:not(.dark-mode) header .btn-toggle i.fa-moon {
+  color: #212121; /* abu gelap untuk moon di light mode */
+}
 
     h2.section-title {
       font-weight: 700;
@@ -90,7 +112,7 @@
     }
 
     footer {
-      padding: 2rem 0;
+      padding: 1.5rem 0;
       background: var(--card-light);
       border-top: 1px solid #ddd;
       margin-top: 3rem;
@@ -116,6 +138,30 @@
       background: var(--card-dark);
       box-shadow: 0 2px 10px rgba(255,255,255,0.05);
     }
+
+    /* 🔹 Responsive tweaks */
+    @media (max-width: 768px) {
+      header .container {
+        flex-direction: column;
+        text-align: center;
+      }
+      header .actions {
+        margin-top: .5rem;
+      }
+      h2.section-title {
+        font-size: 1.2rem;
+      }
+      .card h5 {
+        font-size: 1rem;
+      }
+      table th, table td {
+        font-size: .8rem;
+        padding: .3rem;
+      }
+      .btn-login {
+        font-size: .8rem;
+      }
+    }
   </style>
 </head>
 
@@ -123,28 +169,30 @@
 
 <!-- 🔹 HEADER -->
 <header>
-  <div class="container d-flex justify-content-between align-items-center">
+  <div class="container d-flex justify-content-between align-items-center flex-wrap">
     <div class="brand">
       <i class="fas fa-chart-line"></i> Dashboard Mutasi Siswa
     </div>
     <div class="actions">
-      <button class="btn-toggle" id="toggleDark" title="Ganti Tema">
-        <i class="fas fa-moon"></i>
-      </button>
-      <a href="<?= base_url('index.php/auth/login') ?>" class="btn-login">
-        <i class="fas fa-sign-in-alt"></i> Login
-      </a>
-    </div>
-  </div>
+  <a href="<?= base_url('index.php/dashboard/mutasi') ?>" class="btn btn-light btn-sm me-2">
+    <i class="fas fa-users"></i> Siswa Mutasi
+  </a>
+  <button class="btn-toggle" id="toggleDark" title="Ganti Tema">
+  <i class="fas fa-moon"></i>
+</button>
+
+  <a href="<?= base_url('index.php/auth/login') ?>" class="btn-login">
+    <i class="fas fa-sign-in-alt"></i> Login
+  </a>
+</div>
 </header>
 
 <!-- 🔹 MAIN CONTENT -->
 <main class="container my-5">
+
   <div class="text-center mb-4">
     <h3 class="fw-bold mb-2">Selamat Datang di Sistem Mutasi Siswa 👋</h3>
-    <p class="text-muted" id="currentTime">
-      Data per <strong>-</strong>
-    </p>
+    <p class="text-muted" id="currentTime">Data per <strong>-</strong></p>
   </div>
 
   <h2 class="section-title mb-5">Statistik Mutasi Siswa Sekolah</h2>
@@ -155,6 +203,72 @@
       'keluar' => $keluar,
       'lulus' => $lulus
   ]); ?>
+
+  <!-- 🔹 TABEL JUMLAH SISWA PER ROMBEL -->
+<div class="card shadow-sm mt-5">
+  <div class="card-body">
+    <h5 class="fw-bold text-primary mb-3">
+      <i class="fas fa-users"></i> Jumlah Siswa per Rombongan Belajar
+    </h5>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm mb-0 text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th style="width:50px">No</th>
+            <th>Nama Kelas</th>
+            <th>L</th>
+            <th>P</th>
+            <th>Total</th>
+            <th>Download</th> <!-- 🆕 kolom baru -->
+          </tr>
+        </thead>
+        <tbody>
+          <?php 
+            $no = 1; 
+            $grand_total = 0; 
+            foreach($per_rombel as $r): 
+              $grand_total += $r->total;
+
+              // Ambil ID kelas berdasarkan nama (supaya bisa link ke controller)
+              $kelas = $this->db->get_where('kelas', ['nama' => $r->nama_kelas])->row();
+              $kelas_id = $kelas ? $kelas->id : 0;
+          ?>
+          <tr>
+            <td><?= $no++; ?></td>
+            <td class="text-start"><?= $r->nama_kelas; ?></td>
+            <td><?= $r->laki; ?></td>
+            <td><?= $r->perempuan; ?></td>
+            <td class="fw-bold"><?= $r->total; ?></td>
+            <td>
+              <?php if ($kelas_id): ?>
+                <a href="<?= base_url('index.php/dashboard/download_excel/'.$kelas_id) ?>" 
+                   class="btn btn-sm btn-success">
+                   <i class="fas fa-file-excel"></i> Download
+                </a>
+              <?php else: ?>
+                <span class="text-muted">-</span>
+              <?php endif; ?>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+
+          <?php if(empty($per_rombel)): ?>
+          <tr>
+            <td colspan="6" class="text-muted">Belum ada data siswa aktif.</td>
+          </tr>
+          <?php else: ?>
+          <tr class="table-secondary fw-bold">
+            <td colspan="5" class="text-end">Jumlah Keseluruhan</td>
+            <td><?= $grand_total; ?></td>
+          </tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <!-- 🔹 FOOTER -->
@@ -167,6 +281,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // 🕒 Realtime tanggal & jam
+// 🕒 Realtime tanggal & jam
 function updateTime() {
   const el = document.getElementById('currentTime');
   const now = new Date();
@@ -175,20 +290,33 @@ function updateTime() {
   const jam = now.getHours().toString().padStart(2,'0');
   const menit = now.getMinutes().toString().padStart(2,'0');
   const detik = now.getSeconds().toString().padStart(2,'0');
-  const tanggalStr = `${hari}, ${now.getDate()} ${bulan} ${now.getFullYear()} — ${jam}:${menit}:${detik} WIB`;
-  el.innerHTML = `Data per <strong>${tanggalStr}</strong>`;
+  el.innerHTML = `Data per <strong>${hari}, ${now.getDate()} ${bulan} ${now.getFullYear()} — ${jam}:${menit}:${detik} WIB</strong>`;
 }
 setInterval(updateTime, 1000);
 updateTime();
 
-// 🌗 Dark mode toggle
+// 🌗 Dark mode toggle with icon animation
 const btnToggle = document.getElementById('toggleDark');
+const icon = btnToggle.querySelector('i');
+
 btnToggle.addEventListener('click', () => {
   document.body.classList.toggle('dark-mode');
-  const icon = btnToggle.querySelector('i');
-  icon.classList.toggle('fa-moon');
-  icon.classList.toggle('fa-sun');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('darkMode', isDark);
+  icon.classList.add('fade');
+  setTimeout(() => {
+    icon.classList.remove('fa-moon', 'fa-sun');
+    icon.classList.add(isDark ? 'fa-sun' : 'fa-moon');
+    icon.classList.remove('fade');
+  }, 200);
 });
+
+// apply saved theme on load
+if (localStorage.getItem('darkMode') === 'true') {
+  document.body.classList.add('dark-mode');
+  icon.classList.replace('fa-moon', 'fa-sun');
+}
+
 </script>
 
 </body>

@@ -72,4 +72,54 @@ foreach ($data as $m) {
         $writer->save('php://output');
         exit();
     }
+    public function export_siswa_per_kelas($siswa, $kelas_nama)
+{
+    $excel = new PHPExcel();
+    $excel->setActiveSheetIndex(0);
+    $sheet = $excel->getActiveSheet();
+    $sheet->setTitle('Siswa ' . $kelas_nama);
+
+    // Header kolom
+    $sheet->setCellValue('A1', 'No')
+          ->setCellValue('B1', 'NIS')
+          ->setCellValue('C1', 'Nama Siswa')
+          ->setCellValue('D1', 'Jenis Kelamin')
+          ->setCellValue('E1', 'Alamat');
+
+    // Isi data
+    $row = 2;
+    $no  = 1;
+    foreach ($siswa as $s) {
+        $sheet->setCellValue('A' . $row, $no++)
+              ->setCellValue('B' . $row, $s->nis)
+              ->setCellValue('C' . $row, $s->nama)
+              ->setCellValue('D' . $row, $s->jk)
+              ->setCellValue('E' . $row, $s->alamat);
+        $row++;
+    }
+
+    // Styling header
+    $headerStyle = array(
+        'font' => array('bold' => true),
+        'alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER),
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    );
+    $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+
+    // Auto width kolom
+    foreach (range('A', 'E') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Output ke browser (download otomatis)
+    $filename = 'Daftar_Siswa_' . str_replace(' ', '_', $kelas_nama) . '.xls';
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+
+    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+    $writer->save('php://output');
+    exit();
+}
+
 }
