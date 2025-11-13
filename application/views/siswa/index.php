@@ -121,6 +121,9 @@
           <a href="<?= site_url('siswa/delete/'.$s->id) ?>" onclick="return confirm('Hapus data ini?')" class="btn btn-danger btn-sm">
             <i class="fas fa-trash"></i>
           </a>
+          <a href="<?= site_url('siswa/cetak/'.$s->id) ?>" class="btn btn-info btn-sm" target="_blank">
+    <i class="fas fa-print"></i>
+  </a>
         </td>
       </tr>
     <?php endforeach; ?>

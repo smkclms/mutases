@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Siswa Mutasi — Sistem Mutasi Siswa</title>
+  
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
@@ -64,9 +65,29 @@
     <div class="brand"><i class="fas fa-exchange-alt"></i> Data Siswa Mutasi</div>
     <div class="actions d-flex align-items-center">
       <button id="toggleDark" class="btn-toggle" title="Ganti Tema"><i class="fas fa-moon"></i></button>
-      <a href="<?= base_url('index.php/dashboard') ?>" class="me-2"><i class="fas fa-home"></i> Dashboard</a>
-      <a href="<?= base_url('index.php/auth/login') ?>"><i class="fas fa-sign-in-alt"></i> Login</a>
-    </div>
+      <a href="<?= base_url('index.php/dashboard') ?>" class="me-2">
+  <i class="fas fa-home"></i> Dashboard
+</a>
+
+<!-- <div class="dropdown">
+  <button class="btn-login dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fas fa-sign-in-alt"></i> Login
+  </button>
+
+  <ul class="dropdown-menu dropdown-menu-end shadow">
+    <li>
+      <a class="dropdown-item" href="<?= base_url('index.php/auth/login') ?>">
+        <i class="fas fa-user-shield text-primary"></i> Login Admin
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="<?= base_url('index.php/SiswaAuth') ?>">
+        <i class="fas fa-user-graduate text-success"></i> Login Siswa
+      </a>
+    </li>
+  </ul>
+</div> -->
+
   </div>
 </header>
 
@@ -173,5 +194,7 @@ toggleDark.addEventListener('click', () => {
 });
 if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark');
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

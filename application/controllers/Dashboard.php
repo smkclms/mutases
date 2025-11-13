@@ -5,8 +5,83 @@ class Dashboard extends CI_Controller {
 
   public function __construct() {
     parent::__construct();
+
+    $this->load->library('session');
     $this->load->database();
-  }
+
+    // ambil tahun ajaran dari session jika ada
+    $session_tahun = $this->session->userdata('tahun_id');
+
+    if ($session_tahun) {
+        $this->tahun_id = $session_tahun;
+    } else {
+        // public (tanpa login) -> pakai tahun ajaran aktif (kolom 'aktif')
+        $tahun_aktif = $this->db->get_where('tahun_ajaran', ['aktif' => 1])->row();
+        $this->tahun_id = $tahun_aktif ? $tahun_aktif->id : null;
+    }
+}
+
+// private function get_tahun_aktif()
+// {
+//     return $this->db->get_where('tahun_ajaran', ['is_active' => 1])->row();
+// }
+
+
+private function get_siswa_keluar_by_tingkat()
+{
+    $tahun = $this->tahun_id;
+
+    $result = [
+        'x' => 0,
+        'xi' => 0,
+        'xii' => 0,
+        'total' => 0
+    ];
+
+    // ===============================
+    // KELAS X
+    // ===============================
+    $this->db->select("COUNT(m.id) AS jml");
+    $this->db->from("mutasi m");
+    $this->db->join("siswa_tahun st", "st.siswa_id = m.siswa_id AND st.tahun_id = m.tahun_id", "left");
+    $this->db->join("kelas k", "k.id = st.kelas_id", "left");
+    $this->db->where("m.jenis", "keluar");
+    $this->db->where("m.status_mutasi", "aktif");
+    $this->db->where("m.tahun_id", $tahun);
+    $this->db->where("(k.nama REGEXP '(^X($|[^I])|^10)')");
+    $result['x'] = $this->db->get()->row()->jml;
+
+    // ===============================
+    // KELAS XI
+    // ===============================
+    $this->db->select("COUNT(m.id) AS jml");
+    $this->db->from("mutasi m");
+    $this->db->join("siswa_tahun st", "st.siswa_id = m.siswa_id AND st.tahun_id = m.tahun_id", "left");
+    $this->db->join("kelas k", "k.id = st.kelas_id", "left");
+    $this->db->where("m.jenis", "keluar");
+    $this->db->where("m.status_mutasi", "aktif");
+    $this->db->where("m.tahun_id", $tahun);
+    $this->db->where("(k.nama REGEXP '(^XI($|[^I])|^11)')");
+    $result['xi'] = $this->db->get()->row()->jml;
+
+    // ===============================
+    // KELAS XII
+    // ===============================
+    $this->db->select("COUNT(m.id) AS jml");
+    $this->db->from("mutasi m");
+    $this->db->join("siswa_tahun st", "st.siswa_id = m.siswa_id AND st.tahun_id = m.tahun_id", "left");
+    $this->db->join("kelas k", "k.id = st.kelas_id", "left");
+    $this->db->where("m.jenis", "keluar");
+    $this->db->where("m.status_mutasi", "aktif");
+    $this->db->where("m.tahun_id", $tahun);
+    $this->db->where("(k.nama REGEXP '(^XII|^12)')");
+    $result['xii'] = $this->db->get()->row()->jml;
+
+    // TOTAL
+    $result['total'] = $result['x'] + $result['xi'] + $result['xii'];
+
+    return $result;
+}
 
   public function index() {
     $data['title'] = 'Dashboard';
@@ -24,20 +99,21 @@ class Dashboard extends CI_Controller {
     // ==========================================================
     // 🚪 SISWA KELUAR PER TINGKAT
     // ==========================================================
-    $data['keluar'] = $this->get_siswa_by_tingkat(['mutasi_keluar', 'keluar']);
+    $data['keluar'] = $this->get_siswa_keluar_by_tingkat();
 
-    // ==========================================================
-    // 🎓 SISWA LULUS PER TAHUN AJARAN
-    // ==========================================================
-    $query = $this->db
-      ->select('tahun_ajaran.tahun, COUNT(siswa.id) AS jumlah')
-      ->join('tahun_ajaran', 'tahun_ajaran.id = siswa.tahun_id', 'left')
-      ->where('siswa.status', 'lulus')
-      ->group_by('tahun_ajaran.tahun')
-      ->order_by('tahun_ajaran.tahun', 'ASC')
-      ->get('siswa');
 
-    $data['lulus'] = $query ? $query->result() : [];
+   // ==========================================================
+// 🎓 SISWA LULUS PER TAHUN AJARAN
+// ==========================================================
+$query = $this->db
+    ->select('tahun_ajaran.tahun, COUNT(siswa.id) AS jumlah')
+    ->join('tahun_ajaran', 'tahun_ajaran.id = siswa.tahun_id', 'left')
+    ->where('siswa.status', 'lulus')
+    ->where('siswa.tahun_id', $this->tahun_id)   // ← gunakan tahun ajaran login
+    ->group_by('tahun_ajaran.tahun')
+    ->get('siswa');
+
+$data['lulus'] = $query ? $query->result() : [];
 
     // ==========================================================
     // 🧮 JUMLAH SISWA PER ROMBEL (UNTUK TABEL PUBLIK)
@@ -78,51 +154,96 @@ class Dashboard extends CI_Controller {
   // ==========================================================
   // 🔹 JUMLAH SISWA PER TINGKAT
   // ==========================================================
-  private function get_siswa_by_tingkat($status) {
+  private function get_siswa_by_tingkat($status)
+{
+    $tahun = $this->tahun_id;
     $result = [];
 
-    // Kelas X
-    $this->db->join('kelas', 'kelas.id = siswa.id_kelas', 'left');
-    if (is_array($status)) $this->db->where_in('siswa.status', $status);
-    else $this->db->where('siswa.status', $status);
-    $this->db->where("(kelas.nama REGEXP '(^X($|[^I])|^10)')");
-    $result['x'] = $this->db->count_all_results('siswa', TRUE);
+    // ============================
+    // KELAS X
+    // ============================
+    $this->db->select('COUNT(st.id) AS jumlah');
+    $this->db->from('siswa_tahun st');
+    $this->db->join('kelas k', 'k.id = st.kelas_id', 'left');
+    $this->db->join('siswa s', 's.id = st.siswa_id', 'left');
 
-    // Kelas XI
-    $this->db->join('kelas', 'kelas.id = siswa.id_kelas', 'left');
-    if (is_array($status)) $this->db->where_in('siswa.status', $status);
-    else $this->db->where('siswa.status', $status);
-    $this->db->where("(kelas.nama REGEXP '(^XI($|[^I])|^11)')");
-    $result['xi'] = $this->db->count_all_results('siswa', TRUE);
+    $this->db->where('st.tahun_id', $tahun);
+    if (is_array($status))
+        $this->db->where_in('st.status', $status);
+    else
+        $this->db->where('st.status', $status);
 
-    // Kelas XII
-    $this->db->join('kelas', 'kelas.id = siswa.id_kelas', 'left');
-    if (is_array($status)) $this->db->where_in('siswa.status', $status);
-    else $this->db->where('siswa.status', $status);
-    $this->db->where("(kelas.nama REGEXP '(^XII|^12)')");
-    $result['xii'] = $this->db->count_all_results('siswa', TRUE);
+    $this->db->where("(k.nama REGEXP '(^X($|[^I])|^10)')");
+    $result['x'] = $this->db->get()->row()->jumlah;
+
+    // ============================
+    // KELAS XI
+    // ============================
+    $this->db->select('COUNT(st.id) AS jumlah');
+    $this->db->from('siswa_tahun st');
+    $this->db->join('kelas k', 'k.id = st.kelas_id', 'left');
+    $this->db->join('siswa s', 's.id = st.siswa_id', 'left');
+
+    $this->db->where('st.tahun_id', $tahun);
+    if (is_array($status))
+        $this->db->where_in('st.status', $status);
+    else
+        $this->db->where('st.status', $status);
+
+    $this->db->where("(k.nama REGEXP '(^XI($|[^I])|^11)')");
+    $result['xi'] = $this->db->get()->row()->jumlah;
+
+    // ============================
+    // KELAS XII
+    // ============================
+    $this->db->select('COUNT(st.id) AS jumlah');
+    $this->db->from('siswa_tahun st');
+    $this->db->join('kelas k', 'k.id = st.kelas_id', 'left');
+    $this->db->join('siswa s', 's.id = st.siswa_id', 'left');
+
+    $this->db->where('st.tahun_id', $tahun);
+    if (is_array($status))
+        $this->db->where_in('st.status', $status);
+    else
+        $this->db->where('st.status', $status);
+
+    $this->db->where("(k.nama REGEXP '(^XII|^12)')");
+    $result['xii'] = $this->db->get()->row()->jumlah;
 
     $result['total'] = $result['x'] + $result['xi'] + $result['xii'];
+
     return $result;
-  }
+}
+
+
 
   // ==========================================================
   // 🔹 JUMLAH SISWA PER ROMBEL (UNTUK PUBLIK)
   // ==========================================================
-  private function get_siswa_per_rombel() {
-    $query = $this->db
-      ->select("kelas.nama AS nama_kelas,
-                SUM(CASE WHEN siswa.jk = 'L' THEN 1 ELSE 0 END) AS laki,
-                SUM(CASE WHEN siswa.jk = 'P' THEN 1 ELSE 0 END) AS perempuan,
-                COUNT(siswa.id) AS total")
-      ->join('kelas', 'kelas.id = siswa.id_kelas', 'left')
-      ->where('siswa.status', 'aktif')
-      ->group_by('kelas.nama')
-      ->order_by('kelas.nama', 'ASC')
-      ->get('siswa');
+private function get_siswa_per_rombel()
+{
+    $tahun = $this->tahun_id;
 
-    return $query ? $query->result() : [];
-  }
+    $query = $this->db
+        ->select("
+            k.nama AS nama_kelas,
+            SUM(CASE WHEN s.jk = 'L' THEN 1 ELSE 0 END) AS laki,
+            SUM(CASE WHEN s.jk = 'P' THEN 1 ELSE 0 END) AS perempuan,
+            COUNT(st.id) AS total
+        ")
+        ->from('siswa_tahun st')
+        ->join('siswa s', 's.id = st.siswa_id', 'left')
+        ->join('kelas k', 'k.id = st.kelas_id', 'left')
+        ->where('st.tahun_id', $tahun)
+        ->where('st.status', 'aktif')
+        ->group_by('k.nama')
+        ->order_by('k.nama', 'ASC')
+        ->get();
+
+    return $query->result();
+}
+
+
   public function download_excel($kelas_id = null)
 {
     if (!$kelas_id) show_error('Kelas tidak ditemukan.');

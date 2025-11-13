@@ -181,9 +181,26 @@ body:not(.dark-mode) header .btn-toggle i.fa-moon {
   <i class="fas fa-moon"></i>
 </button>
 
-  <a href="<?= base_url('index.php/auth/login') ?>" class="btn-login">
+  <!-- DROPDOWN LOGIN -->
+<div class="dropdown">
+  <button class="btn-login dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
     <i class="fas fa-sign-in-alt"></i> Login
-  </a>
+  </button>
+
+  <ul class="dropdown-menu dropdown-menu-end shadow">
+    <li>
+      <a class="dropdown-item" href="<?= base_url('index.php/auth/login') ?>">
+        <i class="fas fa-user-shield text-primary"></i> Login Admin
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="<?= base_url('index.php/SiswaAuth') ?>">
+        <i class="fas fa-user-graduate text-success"></i> Login Siswa
+      </a>
+    </li>
+  </ul>
+</div>
+
 </div>
 </header>
 

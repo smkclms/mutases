@@ -61,3 +61,4 @@ $route['tahun'] = 'tahun/index';
 $route['guru'] = 'guru/index';
 $route['kelas'] = 'kelas/index';
 $route['users'] = 'users/index';
+$route['siswa-login'] = 'SiswaAuth';
