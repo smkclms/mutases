@@ -107,5 +107,21 @@ class Siswa_model extends CI_Model {
   return $this->db->get('siswa')->result();
 }
 
+public function get_all_no_limit()
+{
+    $this->db->select('siswa.*, kelas.nama AS nama_kelas, tahun_ajaran.tahun AS tahun_ajaran');
+    $this->db->join('kelas', 'kelas.id = siswa.id_kelas', 'left');
+    $this->db->join('tahun_ajaran', 'tahun_ajaran.id = siswa.tahun_id', 'left');
+    $this->db->order_by('siswa.nama', 'ASC');
+    return $this->db->get($this->table)->result();
+}
+public function get_all_simple() {
+    return $this->db->select('id as id_siswa, nama as nama_siswa, id_kelas')
+                    ->from('siswa')
+                    ->where('status', 'aktif')
+                    ->order_by('nama', 'ASC')
+                    ->get()
+                    ->result();
+}
 
 }

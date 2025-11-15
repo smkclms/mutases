@@ -331,25 +331,61 @@ public function search_siswa() {
 
     echo json_encode($result);
 }
-public function batalkan($id) {
+public function batalkan($id)
+{
     $mutasi = $this->db->get_where('mutasi', ['id' => $id])->row();
     if (!$mutasi) {
-      $this->session->set_flashdata('error', 'Data mutasi tidak ditemukan.');
-      redirect('mutasi');
+        $this->session->set_flashdata('error', 'Data mutasi tidak ditemukan.');
+        redirect('mutasi');
     }
 
-    // Update mutasi jadi dibatalkan
-    $this->db->where('id', $id)->update('mutasi', ['status_mutasi' => 'dibatalkan']);
+    // ============================
+    // 1. Set mutasi jadi dibatalkan
+    // ============================
+    $this->db->where('id', $id)->update('mutasi', [
+        'status_mutasi' => 'dibatalkan'
+    ]);
 
-    // Kembalikan siswa ke aktif dan restore kelas_asal_id (kalau ada)
+    // ============================
+    // 2. Kembalikan status siswa
+    // ============================
     $updateData = ['status' => 'aktif'];
+
     if (!empty($mutasi->kelas_asal_id)) {
-      $updateData['id_kelas'] = $mutasi->kelas_asal_id;
+        $updateData['id_kelas'] = $mutasi->kelas_asal_id;
     }
 
     $this->db->where('id', $mutasi->siswa_id)->update('siswa', $updateData);
 
+    // ============================
+    // 3. FIX UTAMA: perbaiki siswa_tahun
+    // ============================
+    $st = $this->db->get_where('siswa_tahun', [
+        'siswa_id' => $mutasi->siswa_id,
+        'tahun_id' => $mutasi->tahun_id
+    ])->row();
+
+    if ($st) {
+        // Update → kembali aktif
+        $this->db->where('id', $st->id)->update('siswa_tahun', [
+            'status'   => 'aktif',
+            'kelas_id' => $mutasi->kelas_asal_id
+        ]);
+    } else {
+        // Insert → jika row tidak ada
+        $this->db->insert('siswa_tahun', [
+            'siswa_id' => $mutasi->siswa_id,
+            'kelas_id' => $mutasi->kelas_asal_id,
+            'tahun_id' => $mutasi->tahun_id,
+            'status'   => 'aktif'
+        ]);
+    }
+
+    // ============================
+    // 4. Redirect
+    // ============================
     $this->session->set_flashdata('success', 'Mutasi siswa berhasil dibatalkan.');
     redirect('mutasi');
-  }
+}
+
 }

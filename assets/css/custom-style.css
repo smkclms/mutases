@@ -41,25 +41,17 @@ body.dark-mode {
 	color: #e0e0e0;
 }
 
-#wrapper {
-	display: flex;
-	min-height: 100vh;
-	background-color: #1e1e2f;
+/* ========== DARK MODE ONLY ========== */
+body.dark-mode #wrapper {
+	background-color: #1e1e2f !important;
 }
 
-#content-wrapper {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	overflow-y: auto;
-	height: 100vh;
-	background-color: #1e1e2f;
+body.dark-mode #content-wrapper {
+	background-color: #1e1e2f !important;
 }
 
-#content {
-	flex: 1;
-	overflow-y: auto;
-	background-color: #1e1e2f;
+body.dark-mode #content {
+	background-color: #1e1e2f !important;
 }
 
 /* --- SIDEBAR --- */
@@ -226,4 +218,185 @@ a {
 
 a:hover {
 	color: #5d7de2;
+}
+/* =====================================================
+   FIX DROPDOWN PENCARIAN SISWA — DARK MODE SUPPORT
+   ===================================================== */
+
+/* background dropdown */
+body.dark-mode #hasilCari {
+	background: #2d2f3f !important;
+	border: 1px solid #444 !important;
+}
+
+/* tiap item */
+body.dark-mode #hasilCari .item-siswa {
+	color: #ffffff !important;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* warna id / nisn */
+body.dark-mode #hasilCari .item-id {
+	color: #6bb6ff !important;
+}
+
+/* warna kelas */
+body.dark-mode #hasilCari .item-kelas {
+	color: #ffcc8a !important;
+}
+
+/* hover */
+body.dark-mode #hasilCari .item-siswa:hover {
+	background: #3b3d52 !important;
+	color: #fff !important;
+}
+body.dark-mode #hasilCari * {
+	opacity: 1 !important;
+}
+/* =========================
+   MODE TERANG (Light mode)
+========================= */
+body.light-mode {
+	background-color: #f8f9fc !important;
+	color: #1a1a1a !important;
+}
+/* ========== LIGHT MODE ========== */
+body.light-mode #wrapper,
+body.light-mode #content-wrapper,
+body.light-mode #content {
+	background-color: #ffffff !important;
+}
+/* Card, box, panel */
+body.light-mode .card,
+body.light-mode .modal-content,
+body.light-mode .content-wrapper,
+body.light-mode .container-fluid,
+body.light-mode #content {
+	background: #ffffff !important;
+	color: #1a1a1a !important;
+}
+
+/* Semua teks */
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode h4,
+body.light-mode p,
+body.light-mode label,
+body.light-mode a,
+body.light-mode span {
+	color: #1a1a1a !important;
+}
+/* ============================================
+   FIX SB-ADMIN2 LIGHT MODE — FINAL
+=============================================== */
+
+/* Wrapper dan konten utama */
+body.light-mode #wrapper,
+body.light-mode #content-wrapper,
+body.light-mode #content,
+body.light-mode .content,
+body.light-mode .container-fluid {
+	background-color: #ffffff !important;
+	color: #000 !important;
+}
+
+/* Tabel */
+body.light-mode .table,
+body.light-mode .table-responsive {
+	background-color: #ffffff !important;
+	color: #000 !important;
+}
+
+body.light-mode .table thead th {
+	background-color: #e9ecef !important;
+	color: #000 !important;
+}
+
+/* Card */
+body.light-mode .card,
+body.light-mode .card-body,
+body.light-mode .card-header {
+	background-color: #ffffff !important;
+	color: #000 !important;
+}
+
+/* Topbar */
+body.light-mode .topbar,
+body.light-mode #topbar {
+	background-color: #ffffff !important;
+	color: #000 !important;
+}
+
+/* Hilangkan semua class gelap bawaan SBAdmin2 */
+body.light-mode .bg-dark,
+body.light-mode .bg-gray-900,
+body.light-mode .bg-secondary,
+body.light-mode .bg-gradient-primary {
+	background-color: #ffffff !important;
+	background-image: none !important;
+}
+/* ============================================
+   SUPER OVERRIDE — BIKIN LIGHT MODE BENAR-BENAR TERANG
+   ============================================ */
+
+body.light-mode,
+body.light-mode #wrapper,
+body.light-mode #content-wrapper,
+body.light-mode #content,
+body.light-mode .container-fluid,
+body.light-mode .page-content,
+body.light-mode .content,
+body.light-mode .bg-dark,
+body.light-mode .bg-gray-900,
+body.light-mode .bg-gradient-primary,
+body.light-mode .bg-secondary,
+body.light-mode .card,
+body.light-mode .card-body,
+body.light-mode .card-header,
+body.light-mode table,
+body.light-mode .table-responsive,
+body.light-mode nav,
+body.light-mode .navbar,
+body.light-mode .navbar-nav,
+body.light-mode .modal-content {
+	background-color: #ffffff !important;
+	color: #000 !important;
+}
+
+/* Teks apa pun dalam light mode */
+body.light-mode * {
+	color: #000 !important;
+}
+
+/* Hilangkan shadow gelap */
+body.light-mode .shadow,
+body.light-mode .shadow-sm,
+body.light-mode .shadow-lg {
+	box-shadow: none !important;
+}
+/* ===============================================
+   FINAL FIX — LIGHT MODE BENAR-BENAR TERANG
+   =============================================== */
+
+/* Paksa wrapper dan content jadi putih */
+body.light-mode #wrapper,
+body.light-mode #content {
+	background-color: #ffffff !important;
+	color: #000 !important;
+}
+
+/* Container putih */
+body.light-mode .container-fluid {
+	background-color: #ffffff !important;
+}
+
+/* Sidebar tetap biru */
+body.light-mode #wrapper .sidebar {
+	background: linear-gradient(180deg, #4e73df 10%, #224abe 100%) !important;
+}
+
+/* Elemen apapun yang masih gelap diperbaiki */
+body.light-mode * {
+	color: #000 !important;
 }

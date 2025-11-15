@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Mutasi_model extends CI_Model {
 
     // ================================================================
-    //  COUNT (UNTUK PAGINATION)
+    // COUNT (UNTUK PAGINATION)
     // ================================================================
     public function count_all()
     {
@@ -12,9 +12,8 @@ class Mutasi_model extends CI_Model {
         return $this->db->count_all_results('mutasi');
     }
 
-
     // ================================================================
-    //  GET ALL (LIST MUTASI + JOIN SISWA, KELAS, TAHUN)
+    // GET ALL MUTASI + JOIN SISWA, KELAS & TAHUN
     // ================================================================
     public function get_all($limit, $offset)
     {
@@ -22,12 +21,12 @@ class Mutasi_model extends CI_Model {
             mutasi.*,
             siswa.nama AS nama_siswa,
             siswa.nis,
-            kelas.nama AS tujuan_kelas,
+            ktujuan.nama AS tujuan_kelas,
             tahun_ajaran.tahun AS tahun_ajaran
         ');
         $this->db->from('mutasi');
         $this->db->join('siswa', 'siswa.id = mutasi.siswa_id', 'left');
-        $this->db->join('kelas', 'kelas.id = mutasi.tujuan_kelas_id', 'left');
+        $this->db->join('kelas ktujuan', 'ktujuan.id = mutasi.tujuan_kelas_id', 'left');
         $this->db->join('tahun_ajaran', 'tahun_ajaran.id = mutasi.tahun_id', 'left');
         $this->db->where('mutasi.status_mutasi', 'aktif');
         $this->db->order_by('mutasi.id', 'DESC');
@@ -36,9 +35,8 @@ class Mutasi_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-
     // ================================================================
-    //  GET SISWA AKTIF (untuk mutasi keluar)
+    // GET SISWA AKTIF (default)
     // ================================================================
     public function get_siswa_aktif()
     {
@@ -46,7 +44,7 @@ class Mutasi_model extends CI_Model {
     }
 
     // ================================================================
-    //  GET KELAS LIST
+    // GET KELAS LIST
     // ================================================================
     public function get_kelas_list()
     {
@@ -54,73 +52,157 @@ class Mutasi_model extends CI_Model {
     }
 
     // ================================================================
-    //  GET TAHUN LIST
+    // GET TAHUN LIST
     // ================================================================
     public function get_tahun_list()
     {
         return $this->db->order_by('id', 'DESC')->get('tahun_ajaran')->result();
     }
 
+    // ================================================================
+    // RESOLUSI kelas_asal (agar tidak NULL)
+    // ================================================================
+    protected function resolve_kelas_asal($siswa_id, $tahun_id = null, $provided_kelas_asal = null)
+    {
+        // 1) Jika form memberikan kelas_asal, langsung pakai
+        if (!empty($provided_kelas_asal)) {
+            return (int)$provided_kelas_asal;
+        }
+
+        // 2) Cari siswa_tahun berdasarkan tahun aktif dashboard (bukan POST!)
+        if (!$tahun_id) {
+            $tahun_id = $this->session->userdata('tahun_id');
+        }
+
+        if ($tahun_id) {
+            $st = $this->db->get_where('siswa_tahun', [
+                'siswa_id' => $siswa_id,
+                'tahun_id' => $tahun_id,
+                'status'   => 'aktif'
+            ])->row();
+
+            if ($st && $st->kelas_id) return (int)$st->kelas_id;
+        }
+
+        // 3) Cari siswa_tahun terbaru
+        $st2 = $this->db->order_by('tahun_id', 'DESC')
+                        ->where('siswa_id', $siswa_id)
+                        ->get('siswa_tahun')->row();
+        if ($st2 && $st2->kelas_id) return (int)$st2->kelas_id;
+
+        // 4) Fallback ke siswa.id_kelas
+        $siswa = $this->db->select('id_kelas')
+                          ->get_where('siswa', ['id' => $siswa_id])->row();
+        if ($siswa && $siswa->id_kelas) return (int)$siswa->id_kelas;
+
+        // 5) Tidak boleh NULL
+        return 0;
+    }
 
     // ================================================================
-    //  MUTASI KELUAR (UPDATE SISWA + siswa_tahun + siswa_history)
+    // MUTASI KELUAR
     // ================================================================
     public function mutasi_keluar($data)
     {
-        // Insert mutasi
+        $this->db->trans_begin();
+
+        // Insert data mutasi
         $this->db->insert('mutasi', $data);
 
-        // Update status terbaru siswa
-        $status_keluar = 'mutasi_keluar';
+        // Tentukan kelas asal aman
+        $kelas_asal_id = $this->resolve_kelas_asal(
+            $data['siswa_id'],
+            $data['tahun_id'],
+            isset($data['kelas_asal_id']) ? $data['kelas_asal_id'] : null
+        );
 
-        if ($data['jenis_keluar'] == 'meninggal') {
-            $status_keluar = 'meninggal';
-        } elseif ($data['jenis_keluar'] == 'mengundurkan diri') {
-            $status_keluar = 'keluar';
+        // Tentukan status siswa
+        $status_keluar = 'mutasi_keluar';
+        if (isset($data['jenis_keluar'])) {
+            if ($data['jenis_keluar'] === 'meninggal') {
+                $status_keluar = 'meninggal';
+            } elseif ($data['jenis_keluar'] === 'mengundurkan diri') {
+                $status_keluar = 'keluar';
+            }
         }
 
+        // Update status siswa
         $this->db->where('id', $data['siswa_id'])
-                 ->update('siswa', [
-                     'status' => $status_keluar
-                 ]);
+                 ->update('siswa', ['status' => $status_keluar]);
 
-        // Update siswa_tahun (tahun di mana dia keluar)
-        $this->db->where('siswa_id', $data['siswa_id'])
-                 ->where('tahun_id', $data['tahun_id'])
-                 ->update('siswa_tahun', ['status' => 'mutasi_keluar']);
+        // Update atau Insert siswa_tahun (agar tercatat)
+        $st = $this->db->get_where('siswa_tahun', [
+            'siswa_id' => $data['siswa_id'],
+            'tahun_id' => $data['tahun_id']
+        ])->row();
 
-        // Insert history ↴
+        if ($st) {
+            $this->db->where('id', $st->id)
+                     ->update('siswa_tahun', ['status' => 'mutasi_keluar']);
+        } else {
+            $this->db->insert('siswa_tahun', [
+                'siswa_id' => $data['siswa_id'],
+                'kelas_id' => $kelas_asal_id,
+                'tahun_id' => $data['tahun_id'],
+                'status'   => 'mutasi_keluar'
+            ]);
+        }
+
+        // Insert history
         $this->db->insert('siswa_history', [
             'siswa_id' => $data['siswa_id'],
-            'kelas_id' => $data['kelas_asal_id'],
+            'kelas_id' => $kelas_asal_id,
             'tahun_id' => $data['tahun_id'],
             'status'   => 'mutasi_keluar'
         ]);
+
+        // Complete transaction
+        if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            return false;
+        }
+
+        $this->db->trans_commit();
+        return true;
     }
 
-
     // ================================================================
-    //  MUTASI MASUK (siswa pindahan / masuk tahun berjalan)
+    // MUTASI MASUK
     // ================================================================
     public function mutasi_masuk($data)
     {
+        $this->db->trans_begin();
+
         // Insert mutasi
         $this->db->insert('mutasi', $data);
 
-        // Update status & kelas siswa terbaru
+        // Update status siswa
         $this->db->where('id', $data['siswa_id'])
                  ->update('siswa', [
                      'id_kelas' => $data['tujuan_kelas_id'],
                      'status'   => 'aktif'
                  ]);
 
-        // Tambah siswa_tahun (tahun baru)
-        $this->db->insert('siswa_tahun', [
+        // Update atau Insert siswa_tahun
+        $st = $this->db->get_where('siswa_tahun', [
             'siswa_id' => $data['siswa_id'],
-            'kelas_id' => $data['tujuan_kelas_id'],
-            'tahun_id' => $data['tahun_id'],
-            'status'   => 'aktif'
-        ]);
+            'tahun_id' => $data['tahun_id']
+        ])->row();
+
+        if ($st) {
+            $this->db->where('id', $st->id)
+                     ->update('siswa_tahun', [
+                         'kelas_id' => $data['tujuan_kelas_id'],
+                         'status'   => 'aktif'
+                     ]);
+        } else {
+            $this->db->insert('siswa_tahun', [
+                'siswa_id' => $data['siswa_id'],
+                'kelas_id' => $data['tujuan_kelas_id'],
+                'tahun_id' => $data['tahun_id'],
+                'status'   => 'aktif'
+            ]);
+        }
 
         // Insert history
         $this->db->insert('siswa_history', [
@@ -129,29 +211,42 @@ class Mutasi_model extends CI_Model {
             'tahun_id' => $data['tahun_id'],
             'status'   => 'mutasi_masuk'
         ]);
+
+        // Commit
+        if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            return false;
+        }
+
+        $this->db->trans_commit();
+        return true;
     }
 
-
     // ================================================================
-    //  BATALKAN MUTASI
+    // BATALKAN MUTASI
     // ================================================================
     public function batalkan($id)
     {
         $mutasi = $this->db->get_where('mutasi', ['id' => $id])->row();
         if (!$mutasi) return false;
 
-        // Set mutasi jadi dibatalkan
-        $this->db->where('id', $id)->update('mutasi', ['status_mutasi' => 'dibatalkan']);
+        $this->db->trans_begin();
 
-        // Kembalikan data siswa seperti sebelum mutasi keluar
+        // Set status mutasi jadi dibatalkan
+        $this->db->where('id', $id)
+                 ->update('mutasi', ['status_mutasi' => 'dibatalkan']);
+
+        // Jika mutasi keluar → kembalikan status siswa
         if ($mutasi->jenis == 'keluar') {
-            $updateData = ['status' => 'aktif'];
+
+            $update = ['status' => 'aktif'];
 
             if (!empty($mutasi->kelas_asal_id)) {
-                $updateData['id_kelas'] = $mutasi->kelas_asal_id;
+                $update['id_kelas'] = $mutasi->kelas_asal_id;
             }
 
-            $this->db->where('id', $mutasi->siswa_id)->update('siswa', $updateData);
+            $this->db->where('id', $mutasi->siswa_id)
+                     ->update('siswa', $update);
 
             // kembalikan siswa_tahun
             $this->db->where('siswa_id', $mutasi->siswa_id)
@@ -159,9 +254,26 @@ class Mutasi_model extends CI_Model {
                      ->update('siswa_tahun', ['status' => 'aktif']);
         }
 
+        // Jika mutasi masuk
+        if ($mutasi->jenis == 'masuk') {
+            $this->db->where('siswa_id', $mutasi->siswa_id)
+                     ->where('tahun_id', $mutasi->tahun_id)
+                     ->where('kelas_id', $mutasi->tujuan_kelas_id)
+                     ->delete('siswa_tahun');
+
+            $this->db->where('id', $mutasi->siswa_id)
+                     ->update('siswa', ['status' => 'aktif']);
+        }
+
+        // Commit or rollback
+        if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            return false;
+        }
+
+        $this->db->trans_commit();
         return true;
     }
-
 
     // ================================================================
     // Search siswa (autocomplete)
@@ -182,3 +294,4 @@ class Mutasi_model extends CI_Model {
         return $this->db->limit(10)->get('siswa')->result();
     }
 }
+

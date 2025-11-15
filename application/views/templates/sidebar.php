@@ -34,7 +34,15 @@
     <li class="nav-item"><a class="nav-link" href="<?= site_url('laporan') ?>"><i class="fas fa-file-alt"></i> Laporan</a></li>
     <li class="nav-item"><a class="nav-link" href="<?= site_url('tahun') ?>"><i class="fas fa-calendar"></i> Tahun Ajaran</a></li>
     <li class="nav-item"><a class="nav-link" href="<?= site_url('users') ?>"><i class="fas fa-users-cog"></i> Manajemen User</a></li>
-  <?php endif; ?>
+ <li class="nav-item <?= ($active == 'absensi') ? 'active' : '' ?>">
+    <a class="nav-link" href="<?= base_url('index.php/Absensi/Absensi') ?>">
+        <i class="fas fa-user-check"></i>
+        <span>Absensi Siswa</span>
+    </a>
+</li>
+
+
+    <?php endif; ?>
 
   <hr class="sidebar-divider d-none d-md-block">
 

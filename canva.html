@@ -1,0 +1,2900 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Portal Pembelajaran - Muhamad Nazmudin</title>
+		<script src="/_sdk/element_sdk.js"></script>
+		<script src="/_sdk/data_sdk.js"></script>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<style>
+			body {
+				box-sizing: border-box;
+			}
+
+			.gradient-bg {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			}
+
+			.card-shadow {
+				box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+					0 10px 10px -5px rgba(0, 0, 0, 0.04);
+			}
+
+			.profile-image {
+				background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+			}
+
+			.nav-item {
+				transition: all 0.3s ease;
+			}
+
+			.nav-item:hover {
+				transform: translateY(-2px);
+			}
+
+			.nav-item.active {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				color: white;
+			}
+
+			.quiz-option {
+				transition: all 0.3s ease;
+				cursor: pointer;
+			}
+
+			.quiz-option:hover {
+				background-color: #f3f4f6;
+			}
+
+			.quiz-option.selected {
+				background-color: #3b82f6;
+				color: white;
+			}
+
+			.quiz-option.correct {
+				background-color: #10b981;
+				color: white;
+			}
+
+			.quiz-option.incorrect {
+				background-color: #ef4444;
+				color: white;
+			}
+
+			@keyframes fadeInUp {
+				from {
+					opacity: 0;
+					transform: translateY(30px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.animate-fade-in-up {
+				animation: fadeInUp 0.6s ease-out forwards;
+			}
+
+			.loading-spinner {
+				border: 3px solid #f3f3f3;
+				border-top: 3px solid #3498db;
+				border-radius: 50%;
+				width: 20px;
+				height: 20px;
+				animation: spin 1s linear infinite;
+			}
+
+			@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+
+			.admin-tab {
+				transition: all 0.3s ease;
+			}
+
+			.admin-tab.active {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				color: white;
+			}
+
+			.material-card {
+				transition: all 0.3s ease;
+			}
+
+			.material-card:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+			}
+		</style>
+		<style>
+			@view-transition {
+				navigation: auto;
+			}
+		</style>
+	</head>
+	<body class="h-full gradient-bg font-sans">
+		<!-- Navigation -->
+		<nav class="bg-white/10 backdrop-blur-md border-b border-white/20">
+			<div class="max-w-6xl mx-auto px-4">
+				<div class="flex items-center justify-between h-16">
+					<div class="flex items-center gap-3">
+						<div
+							class="profile-image w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold"
+						>
+							<span id="nav-initial">MN</span>
+						</div>
+						<h1 id="nav-title" class="text-white font-bold text-lg">
+							Portal Pembelajaran
+						</h1>
+					</div>
+					<div class="flex items-center gap-2">
+						<div id="nav-menu" class="flex gap-2">
+							<button
+								onclick="showSection('biodata')"
+								class="nav-item px-4 py-2 rounded-lg text-white font-medium active"
+								id="nav-biodata"
+							>
+								Biodata
+							</button>
+							<button
+								onclick="showSection('materi')"
+								class="nav-item px-4 py-2 rounded-lg text-white font-medium"
+								id="nav-materi"
+							>
+								Materi
+							</button>
+							<button
+								onclick="showSection('quiz')"
+								class="nav-item px-4 py-2 rounded-lg text-white font-medium"
+								id="nav-quiz"
+							>
+								Latihan Soal
+							</button>
+							<button
+								onclick="showSection('nilai')"
+								class="nav-item px-4 py-2 rounded-lg text-white font-medium"
+								id="nav-nilai"
+							>
+								Nilai
+							</button>
+							<button
+								onclick="showSection('admin')"
+								class="nav-item px-4 py-2 rounded-lg text-white font-medium hidden"
+								id="nav-admin"
+							>
+								Admin
+							</button>
+						</div>
+						<div
+							class="flex items-center gap-2 ml-4 pl-4 border-l border-white/20"
+						>
+							<span id="user-status" class="text-white/80 text-sm hidden"
+								>Admin</span
+							>
+							<button
+								onclick="toggleLogin()"
+								id="login-btn"
+								class="bg-white/20 hover:bg-white/30 text-white font-medium px-4 py-2 rounded-lg transition-colors"
+							>
+								Login
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</nav>
+		<!-- Login Modal -->
+		<div
+			id="login-modal"
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+		>
+			<div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 card-shadow">
+				<div class="text-center mb-6">
+					<div
+						class="profile-image w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4"
+					>
+						<svg class="w-8 h-8" fill="currentColor" viewbox="0 0 20 20">
+							<path
+								fill-rule="evenodd"
+								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+								clip-rule="evenodd"
+							></path>
+						</svg>
+					</div>
+					<h2 class="text-2xl font-bold text-gray-800 mb-2">Login Admin</h2>
+					<p class="text-gray-600">
+						Masuk untuk mengelola data portal pembelajaran
+					</p>
+				</div>
+				<form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+					<div>
+						<label
+							for="username"
+							class="block text-sm font-medium text-gray-700 mb-2"
+							>Username</label
+						>
+						<input
+							type="text"
+							id="username"
+							name="username"
+							required
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							placeholder="Masukkan username"
+						/>
+					</div>
+					<div>
+						<label
+							for="password"
+							class="block text-sm font-medium text-gray-700 mb-2"
+							>Password</label
+						>
+						<input
+							type="password"
+							id="password"
+							name="password"
+							required
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+							placeholder="Masukkan password"
+						/>
+					</div>
+					<div class="flex gap-3 pt-4">
+						<button
+							type="button"
+							onclick="closeLoginModal()"
+							class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+						>
+							Batal
+						</button>
+						<button
+							type="submit"
+							id="login-submit-btn"
+							class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+						>
+							<span class="flex items-center justify-center gap-2">
+								<span id="login-submit-text">Login</span>
+								<div id="login-spinner" class="loading-spinner hidden"></div
+							></span>
+						</button>
+					</div>
+				</form>
+				<div class="mt-6 p-4 bg-blue-50 rounded-lg">
+					<p class="text-sm text-blue-700 font-medium mb-2">Demo Login:</p>
+					<p class="text-xs text-blue-600">
+						Username:
+						<span class="font-mono bg-blue-100 px-1 rounded">admin</span>
+					</p>
+					<p class="text-xs text-blue-600">
+						Password:
+						<span class="font-mono bg-blue-100 px-1 rounded">admin123</span>
+					</p>
+				</div>
+			</div>
+		</div>
+		<!-- Admin Panel Section -->
+		<div id="admin-section" class="section hidden">
+			<div class="max-w-6xl mx-auto py-8 px-4">
+				<!-- Admin Navigation Tabs -->
+				<div class="bg-white rounded-2xl card-shadow mb-8">
+					<div class="border-b border-gray-200">
+						<nav class="flex space-x-8 px-8 pt-6">
+							<button
+								onclick="showAdminTab('profile')"
+								class="admin-tab px-4 py-2 rounded-lg font-medium active"
+								id="admin-tab-profile"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								Profil
+							</button>
+							<button
+								onclick="showAdminTab('classes')"
+								class="admin-tab px-4 py-2 rounded-lg font-medium"
+								id="admin-tab-classes"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"
+									></path>
+								</svg>
+								Kelas
+							</button>
+							<button
+								onclick="showAdminTab('students')"
+								class="admin-tab px-4 py-2 rounded-lg font-medium"
+								id="admin-tab-students"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
+									></path>
+								</svg>
+								Siswa
+							</button>
+							<button
+								onclick="showAdminTab('materials')"
+								class="admin-tab px-4 py-2 rounded-lg font-medium"
+								id="admin-tab-materials"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"
+									></path>
+								</svg>
+								Materi
+							</button>
+							<button
+								onclick="showAdminTab('exercises')"
+								class="admin-tab px-4 py-2 rounded-lg font-medium"
+								id="admin-tab-exercises"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								Latihan Soal
+							</button>
+							<button
+								onclick="showAdminTab('scores')"
+								class="admin-tab px-4 py-2 rounded-lg font-medium"
+								id="admin-tab-scores"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								Nilai
+							</button>
+						</nav>
+					</div>
+					<!-- Profile Tab -->
+					<div id="admin-profile-tab" class="admin-tab-content p-8">
+						<h3 class="text-2xl font-bold text-gray-800 mb-6">Edit Profil</h3>
+						<form
+							id="admin-form"
+							onsubmit="saveAdminChanges(event)"
+							class="grid md:grid-cols-2 gap-6"
+						>
+							<div>
+								<label
+									for="admin-nama"
+									class="block text-sm font-medium text-gray-700 mb-2"
+									>Nama Lengkap</label
+								>
+								<input
+									type="text"
+									id="admin-nama"
+									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								/>
+							</div>
+							<div>
+								<label
+									for="admin-tempat"
+									class="block text-sm font-medium text-gray-700 mb-2"
+									>Tempat Lahir</label
+								>
+								<input
+									type="text"
+									id="admin-tempat"
+									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								/>
+							</div>
+							<div>
+								<label
+									for="admin-tanggal"
+									class="block text-sm font-medium text-gray-700 mb-2"
+									>Tanggal Lahir</label
+								>
+								<input
+									type="text"
+									id="admin-tanggal"
+									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								/>
+							</div>
+							<div>
+								<label
+									for="admin-email"
+									class="block text-sm font-medium text-gray-700 mb-2"
+									>Email</label
+								>
+								<input
+									type="email"
+									id="admin-email"
+									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								/>
+							</div>
+							<div class="md:col-span-2">
+								<label
+									for="admin-pendidikan"
+									class="block text-sm font-medium text-gray-700 mb-2"
+									>Riwayat Pendidikan</label
+								>
+								<textarea
+									id="admin-pendidikan"
+									rows="3"
+									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								></textarea>
+							</div>
+							<div class="md:col-span-2">
+								<label
+									for="admin-pekerjaan"
+									class="block text-sm font-medium text-gray-700 mb-2"
+									>Riwayat Pekerjaan</label
+								>
+								<textarea
+									id="admin-pekerjaan"
+									rows="3"
+									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+								></textarea>
+							</div>
+							<div class="md:col-span-2">
+								<button
+									type="submit"
+									id="admin-save-btn"
+									class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+								>
+									<span class="flex items-center justify-center gap-2">
+										<span id="admin-save-text">Simpan Perubahan</span>
+										<div
+											id="admin-save-spinner"
+											class="loading-spinner hidden"
+										></div
+									></span>
+								</button>
+							</div>
+						</form>
+					</div>
+					<!-- Classes Tab -->
+					<div id="admin-classes-tab" class="admin-tab-content p-8 hidden">
+						<div class="flex justify-between items-center mb-6">
+							<h3 class="text-2xl font-bold text-gray-800">Kelola Kelas</h3>
+							<button
+								onclick="showAddClassModal()"
+								class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								Tambah Kelas
+							</button>
+						</div>
+						<div
+							id="classes-container"
+							class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+						>
+							<div id="no-classes" class="col-span-full text-center py-12">
+								<svg
+									class="w-16 h-16 text-gray-400 mx-auto mb-4"
+									fill="none"
+									stroke="currentColor"
+									viewbox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+									></path>
+								</svg>
+								<h4 class="text-xl font-semibold text-gray-600 mb-2">
+									Belum Ada Kelas
+								</h4>
+								<p class="text-gray-500">
+									Tambahkan kelas pertama untuk memulai
+								</p>
+							</div>
+						</div>
+					</div>
+					<!-- Students Tab -->
+					<div id="admin-students-tab" class="admin-tab-content p-8 hidden">
+						<div class="flex justify-between items-center mb-6">
+							<h3 class="text-2xl font-bold text-gray-800">Kelola Siswa</h3>
+							<button
+								onclick="showAddStudentModal()"
+								class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								Tambah Siswa
+							</button>
+						</div>
+						<div id="students-table-container">
+							<div id="no-students" class="text-center py-12">
+								<svg
+									class="w-16 h-16 text-gray-400 mx-auto mb-4"
+									fill="none"
+									stroke="currentColor"
+									viewbox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+									></path>
+								</svg>
+								<h4 class="text-xl font-semibold text-gray-600 mb-2">
+									Belum Ada Siswa
+								</h4>
+								<p class="text-gray-500">
+									Tambahkan siswa untuk memulai pembelajaran
+								</p>
+							</div>
+							<div id="students-table" class="hidden overflow-x-auto">
+								<table class="w-full">
+									<thead>
+										<tr class="bg-gray-50">
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Nomor Induk
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Nama
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Email
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Kelas
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Aksi
+											</th>
+										</tr>
+									</thead>
+									<tbody
+										id="students-tbody"
+										class="bg-white divide-y divide-gray-200"
+									></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<!-- Materials Tab -->
+					<div id="admin-materials-tab" class="admin-tab-content p-8 hidden">
+						<div class="flex justify-between items-center mb-6">
+							<h3 class="text-2xl font-bold text-gray-800">Kelola Materi</h3>
+							<button
+								onclick="showAddMaterialModal()"
+								class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								Tambah Materi
+							</button>
+						</div>
+						<div
+							id="materials-container"
+							class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+						>
+							<div id="no-materials" class="col-span-full text-center py-12">
+								<svg
+									class="w-16 h-16 text-gray-400 mx-auto mb-4"
+									fill="none"
+									stroke="currentColor"
+									viewbox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+									></path>
+								</svg>
+								<h4 class="text-xl font-semibold text-gray-600 mb-2">
+									Belum Ada Materi
+								</h4>
+								<p class="text-gray-500">
+									Tambahkan materi pembelajaran pertama
+								</p>
+							</div>
+						</div>
+					</div>
+					<!-- Exercises Tab -->
+					<div id="admin-exercises-tab" class="admin-tab-content p-8 hidden">
+						<div class="flex justify-between items-center mb-6">
+							<h3 class="text-2xl font-bold text-gray-800">
+								Kelola Latihan Soal
+							</h3>
+							<button
+								onclick="showAddExerciseModal()"
+								class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+							>
+								<svg
+									class="w-5 h-5 inline mr-2"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								Tambah Latihan
+							</button>
+						</div>
+						<div id="exercises-container" class="space-y-6">
+							<div id="no-exercises" class="text-center py-12">
+								<svg
+									class="w-16 h-16 text-gray-400 mx-auto mb-4"
+									fill="none"
+									stroke="currentColor"
+									viewbox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+									></path>
+								</svg>
+								<h4 class="text-xl font-semibold text-gray-600 mb-2">
+									Belum Ada Latihan Soal
+								</h4>
+								<p class="text-gray-500">
+									Buat latihan soal pertama untuk siswa
+								</p>
+							</div>
+						</div>
+					</div>
+					<!-- Scores Tab -->
+					<div id="admin-scores-tab" class="admin-tab-content p-8 hidden">
+						<h3 class="text-2xl font-bold text-gray-800 mb-6">Kelola Nilai</h3>
+						<div class="grid md:grid-cols-3 gap-6 mb-8">
+							<div class="bg-blue-50 rounded-xl p-6">
+								<div class="flex items-center justify-between">
+									<div>
+										<p class="text-sm font-medium text-blue-600">Total Siswa</p>
+										<p
+											id="total-students-count"
+											class="text-2xl font-bold text-blue-900"
+										>
+											0
+										</p>
+									</div>
+									<svg
+										class="w-8 h-8 text-blue-500"
+										fill="currentColor"
+										viewbox="0 0 20 20"
+									>
+										<path
+											d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"
+										></path>
+									</svg>
+								</div>
+							</div>
+							<div class="bg-green-50 rounded-xl p-6">
+								<div class="flex items-center justify-between">
+									<div>
+										<p class="text-sm font-medium text-green-600">
+											Total Latihan
+										</p>
+										<p
+											id="total-exercises-count"
+											class="text-2xl font-bold text-green-900"
+										>
+											0
+										</p>
+									</div>
+									<svg
+										class="w-8 h-8 text-green-500"
+										fill="currentColor"
+										viewbox="0 0 20 20"
+									>
+										<path
+											fill-rule="evenodd"
+											d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+											clip-rule="evenodd"
+										></path>
+									</svg>
+								</div>
+							</div>
+							<div class="bg-purple-50 rounded-xl p-6">
+								<div class="flex items-center justify-between">
+									<div>
+										<p class="text-sm font-medium text-purple-600">
+											Total Nilai
+										</p>
+										<p
+											id="total-scores-count"
+											class="text-2xl font-bold text-purple-900"
+										>
+											0
+										</p>
+									</div>
+									<svg
+										class="w-8 h-8 text-purple-500"
+										fill="currentColor"
+										viewbox="0 0 20 20"
+									>
+										<path
+											fill-rule="evenodd"
+											d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3z"
+											clip-rule="evenodd"
+										></path>
+									</svg>
+								</div>
+							</div>
+						</div>
+						<div id="admin-scores-container">
+							<div id="no-admin-scores" class="text-center py-12">
+								<svg
+									class="w-16 h-16 text-gray-400 mx-auto mb-4"
+									fill="none"
+									stroke="currentColor"
+									viewbox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+									></path>
+								</svg>
+								<h4 class="text-xl font-semibold text-gray-600 mb-2">
+									Belum Ada Nilai
+								</h4>
+								<p class="text-gray-500">
+									Nilai akan muncul setelah siswa mengerjakan latihan
+								</p>
+							</div>
+							<div id="admin-scores-table" class="hidden overflow-x-auto">
+								<table class="w-full">
+									<thead>
+										<tr class="bg-gray-50">
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Tanggal
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Siswa
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Latihan
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Nilai
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Status
+											</th>
+											<th
+												class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+											>
+												Aksi
+											</th>
+										</tr>
+									</thead>
+									<tbody
+										id="admin-scores-tbody"
+										class="bg-white divide-y divide-gray-200"
+									></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<main class="min-h-full py-8 px-4">
+			<div class="max-w-6xl mx-auto">
+				<!-- Biodata Section -->
+				<div id="biodata-section" class="section">
+					<!-- Header Card -->
+					<div
+						class="bg-white rounded-2xl card-shadow p-8 mb-8 animate-fade-in-up"
+					>
+						<div class="flex flex-col md:flex-row items-center gap-8">
+							<div
+								class="profile-image w-32 h-32 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg"
+							>
+								<span id="profile-initial">MN</span>
+							</div>
+							<div class="text-center md:text-left flex-1">
+								<h1
+									id="nama-display"
+									class="text-3xl md:text-4xl font-bold text-gray-800 mb-2"
+								>
+									Muhamad Nazmudin
+								</h1>
+								<div class="flex flex-col md:flex-row gap-4 text-gray-600">
+									<div
+										class="flex items-center justify-center md:justify-start gap-2"
+									>
+										<svg
+											class="w-5 h-5 text-blue-500"
+											fill="currentColor"
+											viewbox="0 0 20 20"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+												clip-rule="evenodd"
+											></path></svg
+										><span id="tempat-lahir-display">Kuningan</span>
+									</div>
+									<div
+										class="flex items-center justify-center md:justify-start gap-2"
+									>
+										<svg
+											class="w-5 h-5 text-green-500"
+											fill="currentColor"
+											viewbox="0 0 20 20"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+												clip-rule="evenodd"
+											></path></svg
+										><span id="tanggal-lahir-display">15 September 1995</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- Personal Information -->
+					<div class="grid md:grid-cols-2 gap-8">
+						<div class="bg-white rounded-2xl card-shadow p-8">
+							<h2
+								class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3"
+							>
+								<svg
+									class="w-6 h-6 text-purple-500"
+									fill="currentColor"
+									viewbox="0 0 20 20"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+										clip-rule="evenodd"
+									></path>
+								</svg>
+								Informasi Pribadi
+							</h2>
+							<div class="space-y-4">
+								<div class="bg-gray-50 rounded-xl p-4">
+									<h3 class="font-semibold text-gray-700 mb-1">Nama Lengkap</h3>
+									<p id="nama-detail" class="text-gray-800">Muhamad Nazmudin</p>
+								</div>
+								<div class="bg-gray-50 rounded-xl p-4">
+									<h3 class="font-semibold text-gray-700 mb-1">Tempat Lahir</h3>
+									<p id="tempat-detail" class="text-gray-800">Kuningan</p>
+								</div>
+								<div class="bg-gray-50 rounded-xl p-4">
+									<h3 class="font-semibold text-gray-700 mb-1">
+										Tanggal Lahir
+									</h3>
+									<p id="tanggal-detail" class="text-gray-800">
+										15 September 1995
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="space-y-8">
+							<!-- Education -->
+							<div class="bg-white rounded-2xl card-shadow p-8">
+								<h2
+									class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3"
+								>
+									<svg
+										class="w-6 h-6 text-indigo-500"
+										fill="currentColor"
+										viewbox="0 0 20 20"
+									>
+										<path
+											d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"
+										></path>
+									</svg>
+									Riwayat Pendidikan
+								</h2>
+								<div
+									class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6"
+								>
+									<p
+										id="pendidikan-detail"
+										class="text-gray-700 leading-relaxed"
+									>
+										Informasi riwayat pendidikan akan ditampilkan di sini.
+									</p>
+								</div>
+							</div>
+							<!-- Work Experience -->
+							<div class="bg-white rounded-2xl card-shadow p-8">
+								<h2
+									class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3"
+								>
+									<svg
+										class="w-6 h-6 text-green-500"
+										fill="currentColor"
+										viewbox="0 0 20 20"
+									>
+										<path
+											fill-rule="evenodd"
+											d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+											clip-rule="evenodd"
+										></path>
+										<path
+											d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"
+										></path>
+									</svg>
+									Riwayat Pekerjaan
+								</h2>
+								<div
+									class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6"
+								>
+									<p
+										id="pekerjaan-detail"
+										class="text-gray-700 leading-relaxed"
+									>
+										Informasi riwayat pekerjaan akan ditampilkan di sini.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Materi Section -->
+				<div id="materi-section" class="section hidden">
+					<div class="bg-white rounded-2xl card-shadow p-8 mb-8">
+						<h2
+							class="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3"
+						>
+							<svg
+								class="w-8 h-8 text-blue-500"
+								fill="currentColor"
+								viewbox="0 0 20 20"
+							>
+								<path
+									d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"
+								></path></svg
+							><span id="judul-materi-display">Materi Pembelajaran</span>
+						</h2>
+						<p id="deskripsi-materi-display" class="text-gray-600 mb-8">
+							Akses berbagai materi pembelajaran
+						</p>
+						<div
+							id="public-materials-container"
+							class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+						>
+							<div
+								id="no-public-materials"
+								class="col-span-full text-center py-12"
+							>
+								<svg
+									class="w-16 h-16 text-gray-400 mx-auto mb-4"
+									fill="none"
+									stroke="currentColor"
+									viewbox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+									></path>
+								</svg>
+								<h3 class="text-xl font-semibold text-gray-600 mb-2">
+									Belum Ada Materi
+								</h3>
+								<p class="text-gray-500">
+									Materi pembelajaran akan ditampilkan di sini
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Quiz Section -->
+				<div id="quiz-section" class="section hidden">
+					<div class="bg-white rounded-2xl card-shadow p-8">
+						<h2
+							class="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3"
+						>
+							<svg
+								class="w-8 h-8 text-orange-500"
+								fill="currentColor"
+								viewbox="0 0 20 20"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+									clip-rule="evenodd"
+								></path>
+							</svg>
+							Latihan Soal
+						</h2>
+						<div id="quiz-list-container">
+							<div id="no-quiz-available" class="text-center py-12">
+								<svg
+									class="w-16 h-16 text-gray-400 mx-auto mb-4"
+									fill="none"
+									stroke="currentColor"
+									viewbox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+									></path>
+								</svg>
+								<h3 class="text-xl font-semibold text-gray-600 mb-2">
+									Belum Ada Latihan Soal
+								</h3>
+								<p class="text-gray-500">
+									Latihan soal akan tersedia setelah admin menambahkannya
+								</p>
+							</div>
+							<div
+								id="quiz-list"
+								class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"
+							></div>
+						</div>
+						<div id="quiz-container" class="hidden">
+							<div id="quiz-question">
+								<div class="mb-6">
+									<div class="flex justify-between items-center mb-4">
+										<span class="text-sm font-medium text-gray-500"
+											>Soal <span id="question-number">1</span> dari
+											<span id="total-questions">5</span></span
+										>
+										<span class="text-sm font-medium text-gray-500"
+											>Skor: <span id="current-score">0</span></span
+										>
+									</div>
+									<div class="w-full bg-gray-200 rounded-full h-2">
+										<div
+											id="progress-bar"
+											class="bg-orange-500 h-2 rounded-full transition-all duration-300"
+											style="width: 20%"
+										></div>
+									</div>
+								</div>
+								<div class="bg-gray-50 rounded-xl p-6 mb-6">
+									<h3
+										id="question-text"
+										class="text-xl font-semibold text-gray-800 mb-6"
+									>
+										Pertanyaan akan muncul di sini
+									</h3>
+									<div id="options-container" class="space-y-3">
+										<!-- Options will be inserted here -->
+									</div>
+								</div>
+								<div class="flex justify-between">
+									<button
+										id="prev-btn"
+										onclick="previousQuestion()"
+										class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+										disabled
+									>
+										Sebelumnya
+									</button>
+									<button
+										id="next-btn"
+										onclick="nextQuestion()"
+										class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+										disabled
+									>
+										Selanjutnya
+									</button>
+								</div>
+							</div>
+							<div id="quiz-result" class="hidden text-center">
+								<div
+									class="bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-8"
+								>
+									<svg
+										class="w-16 h-16 text-green-500 mx-auto mb-4"
+										fill="currentColor"
+										viewbox="0 0 20 20"
+									>
+										<path
+											fill-rule="evenodd"
+											d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+											clip-rule="evenodd"
+										></path>
+									</svg>
+									<h3 class="text-2xl font-bold text-gray-800 mb-2">
+										Latihan Selesai!
+									</h3>
+									<p class="text-gray-600 mb-4">
+										Skor Anda:
+										<span
+											id="final-score"
+											class="font-bold text-2xl text-green-600"
+											>0</span
+										>/100
+									</p>
+									<p id="score-message" class="text-gray-600 mb-6">
+										Pesan akan muncul di sini
+									</p>
+									<div class="flex gap-4 justify-center">
+										<button
+											onclick="saveScore()"
+											id="save-score-btn"
+											class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+										>
+											<span class="flex items-center gap-2">
+												<span id="save-text">Simpan Nilai</span>
+												<div
+													id="save-spinner"
+													class="loading-spinner hidden"
+												></div
+											></span>
+										</button>
+										<button
+											onclick="backToQuizList()"
+											class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+										>
+											Kembali ke Daftar
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Nilai Section -->
+				<div id="nilai-section" class="section hidden">
+					<div class="bg-white rounded-2xl card-shadow p-8">
+						<h2
+							class="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3"
+						>
+							<svg
+								class="w-8 h-8 text-green-500"
+								fill="currentColor"
+								viewbox="0 0 20 20"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"
+								></path>
+							</svg>
+							Daftar Nilai
+						</h2>
+						<div id="scores-container">
+							<div id="no-scores" class="text-center py-12">
+								<svg
+									class="w-16 h-16 text-gray-400 mx-auto mb-4"
+									fill="none"
+									stroke="currentColor"
+									viewbox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+									></path>
+								</svg>
+								<h3 class="text-xl font-semibold text-gray-600 mb-2">
+									Belum Ada Nilai
+								</h3>
+								<p class="text-gray-500">
+									Selesaikan latihan soal untuk melihat nilai Anda di sini
+								</p>
+							</div>
+							<div id="scores-table" class="hidden">
+								<div class="overflow-x-auto">
+									<table class="w-full">
+										<thead>
+											<tr class="bg-gray-50">
+												<th
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													No
+												</th>
+												<th
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													Tanggal
+												</th>
+												<th
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													Latihan
+												</th>
+												<th
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													Nilai
+												</th>
+												<th
+													class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+												>
+													Status
+												</th>
+											</tr>
+										</thead>
+										<tbody
+											id="scores-tbody"
+											class="bg-white divide-y divide-gray-200"
+										>
+											<!-- Scores will be inserted here -->
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+		<!-- Modals will be inserted here dynamically -->
+		<script>
+			// Default configuration
+			const defaultConfig = {
+			    nama_lengkap: "Muhamad Nazmudin",
+			    tempat_lahir: "Kuningan",
+			    tanggal_lahir: "15 September 1995",
+			    riwayat_pendidikan: "Informasi riwayat pendidikan akan ditampilkan di sini.",
+			    riwayat_pekerjaan: "Informasi riwayat pekerjaan akan ditampilkan di sini.",
+			    judul_materi: "Materi Pembelajaran",
+			    deskripsi_materi: "Akses berbagai materi pembelajaran"
+			};
+
+			// Global data storage
+			let allData = [];
+			let allClasses = [];
+			let allStudents = [];
+			let allMaterials = [];
+			let allExercises = [];
+			let allScores = [];
+			let allQuestions = [];
+
+			// Quiz state
+			let currentExercise = null;
+			let currentQuestion = 0;
+			let userAnswers = [];
+			let quizScore = 0;
+
+			// Login state
+			let isLoggedIn = false;
+			let adminData = null;
+
+			// Data handler for SDK
+			const dataHandler = {
+			    onDataChanged(data) {
+			        allData = data;
+			        allClasses = data.filter(item => item.type === 'class');
+			        allStudents = data.filter(item => item.type === 'student');
+			        allMaterials = data.filter(item => item.type === 'material');
+			        allExercises = data.filter(item => item.type === 'exercise');
+			        allScores = data.filter(item => item.type === 'score');
+			        allQuestions = data.filter(item => item.type === 'question');
+
+			        const adminRecords = data.filter(item => item.type === 'admin');
+			        if (adminRecords.length > 0) {
+			            adminData = adminRecords[0];
+			        }
+
+			        // Update all UI components
+			        renderClasses();
+			        renderStudents();
+			        renderMaterials();
+			        renderPublicMaterials();
+			        renderExercises();
+			        renderQuizList();
+			        renderScores();
+			        renderAdminScores();
+			        updateAdminStats();
+			    }
+			};
+
+			// Initialize Data SDK
+			async function initDataSdk() {
+			    if (window.dataSdk) {
+			        const result = await window.dataSdk.init(dataHandler);
+			        if (!result.isOk) {
+			            console.error("Failed to initialize data SDK");
+			        }
+			    }
+			}
+
+			// Function to update profile initial
+			function updateProfileInitial(nama) {
+			    const words = nama.split(' ');
+			    const initials = words.map(word => word.charAt(0).toUpperCase()).join('');
+			    const initial = initials.substring(0, 2);
+			    document.getElementById('profile-initial').textContent = initial;
+			    document.getElementById('nav-initial').textContent = initial;
+			}
+
+			// Function to update UI based on config
+			async function onConfigChange(config) {
+			    const nama = config.nama_lengkap || defaultConfig.nama_lengkap;
+			    const tempatLahir = config.tempat_lahir || defaultConfig.tempat_lahir;
+			    const tanggalLahir = config.tanggal_lahir || defaultConfig.tanggal_lahir;
+			    const pendidikan = config.riwayat_pendidikan || defaultConfig.riwayat_pendidikan;
+			    const pekerjaan = config.riwayat_pekerjaan || defaultConfig.riwayat_pekerjaan;
+			    const judulMateri = config.judul_materi || defaultConfig.judul_materi;
+			    const deskripsiMateri = config.deskripsi_materi || defaultConfig.deskripsi_materi;
+
+			    // Update nama elements
+			    document.getElementById('nama-display').textContent = nama;
+			    document.getElementById('nama-detail').textContent = nama;
+
+			    // Update tempat lahir elements
+			    document.getElementById('tempat-lahir-display').textContent = tempatLahir;
+			    document.getElementById('tempat-detail').textContent = tempatLahir;
+
+			    // Update tanggal lahir elements
+			    document.getElementById('tanggal-lahir-display').textContent = tanggalLahir;
+			    document.getElementById('tanggal-detail').textContent = tanggalLahir;
+
+			    // Update pendidikan dan pekerjaan
+			    document.getElementById('pendidikan-detail').textContent = pendidikan;
+			    document.getElementById('pekerjaan-detail').textContent = pekerjaan;
+
+			    // Update materi
+			    document.getElementById('judul-materi-display').textContent = judulMateri;
+			    document.getElementById('deskripsi-materi-display').textContent = deskripsiMateri;
+
+			    // Update profile initial
+			    updateProfileInitial(nama);
+			}
+
+			// Navigation functions
+			function showSection(sectionName) {
+			    // Hide all sections
+			    document.querySelectorAll('.section').forEach(section => {
+			        section.classList.add('hidden');
+			    });
+
+			    // Remove active class from all nav items
+			    document.querySelectorAll('.nav-item').forEach(item => {
+			        item.classList.remove('active');
+			    });
+
+			    // Show selected section
+			    document.getElementById(sectionName + '-section').classList.remove('hidden');
+
+			    // Add active class to selected nav item
+			    document.getElementById('nav-' + sectionName).classList.add('active');
+			}
+
+			// Admin tab functions
+			function showAdminTab(tabName) {
+			    // Remove active class from all admin tabs
+			    document.querySelectorAll('.admin-tab').forEach(tab => {
+			        tab.classList.remove('active');
+			    });
+
+			    // Hide all admin tab contents
+			    document.querySelectorAll('.admin-tab-content').forEach(content => {
+			        content.classList.add('hidden');
+			    });
+
+			    // Show selected tab content
+			    document.getElementById('admin-' + tabName + '-tab').classList.remove('hidden');
+
+			    // Add active class to selected tab
+			    document.getElementById('admin-tab-' + tabName).classList.add('active');
+			}
+
+			// Custom modal function
+			function showCustomModal(title, message, type = 'info') {
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+
+			    let iconColor = 'text-blue-500';
+			    let bgColor = 'bg-blue-50';
+			    if (type === 'success') {
+			        iconColor = 'text-green-500';
+			        bgColor = 'bg-green-50';
+			    } else if (type === 'error') {
+			        iconColor = 'text-red-500';
+			        bgColor = 'bg-red-50';
+			    }
+
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-md mx-4">
+			            <div class="flex items-center gap-3 mb-4">
+			                <div class="${bgColor} p-2 rounded-full">
+			                    <svg class="w-6 h-6 ${iconColor}" fill="currentColor" viewBox="0 0 20 20">
+			                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+			                    </svg>
+			                </div>
+			                <h3 class="text-xl font-bold text-gray-800">${title}</h3>
+			            </div>
+			            <p class="text-gray-600 mb-6">${message}</p>
+			            <button onclick="this.closest('.fixed').remove()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                OK
+			            </button>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			}
+
+			// Login functions
+			function toggleLogin() {
+			    if (isLoggedIn) {
+			        logout();
+			    } else {
+			        openLoginModal();
+			    }
+			}
+
+			function openLoginModal() {
+			    document.getElementById('login-modal').classList.remove('hidden');
+			    document.getElementById('username').focus();
+			}
+
+			function closeLoginModal() {
+			    document.getElementById('login-modal').classList.add('hidden');
+			    document.getElementById('login-form').reset();
+			}
+
+			async function handleLogin(event) {
+			    event.preventDefault();
+
+			    const username = document.getElementById('username').value;
+			    const password = document.getElementById('password').value;
+
+			    const submitBtn = document.getElementById('login-submit-btn');
+			    const submitText = document.getElementById('login-submit-text');
+			    const spinner = document.getElementById('login-spinner');
+
+			    // Show loading
+			    submitBtn.disabled = true;
+			    submitText.textContent = 'Memverifikasi...';
+			    spinner.classList.remove('hidden');
+
+			    // Simulate login delay
+			    await new Promise(resolve => setTimeout(resolve, 1000));
+
+			    // Simple demo authentication
+			    if (username === 'admin' && password === 'admin123') {
+			        isLoggedIn = true;
+			        updateLoginUI();
+			        closeLoginModal();
+			        showCustomModal('Login Berhasil', 'Selamat datang, Admin! Anda sekarang dapat mengelola portal pembelajaran.', 'success');
+
+			        // Load admin data to form
+			        loadAdminForm();
+			    } else {
+			        showCustomModal('Login Gagal', 'Username atau password salah. Gunakan: admin / admin123', 'error');
+			    }
+
+			    // Reset button
+			    submitBtn.disabled = false;
+			    submitText.textContent = 'Login';
+			    spinner.classList.add('hidden');
+			}
+
+			function logout() {
+			    isLoggedIn = false;
+			    updateLoginUI();
+			    showSection('biodata');
+			    showCustomModal('Logout Berhasil', 'Anda telah keluar dari panel admin.', 'success');
+			}
+
+			function updateLoginUI() {
+			    const loginBtn = document.getElementById('login-btn');
+			    const userStatus = document.getElementById('user-status');
+			    const adminNav = document.getElementById('nav-admin');
+
+			    if (isLoggedIn) {
+			        loginBtn.textContent = 'Logout';
+			        userStatus.classList.remove('hidden');
+			        adminNav.classList.remove('hidden');
+			    } else {
+			        loginBtn.textContent = 'Login';
+			        userStatus.classList.add('hidden');
+			        adminNav.classList.add('hidden');
+			    }
+			}
+
+			function loadAdminForm() {
+			    const config = window.elementSdk?.config || defaultConfig;
+
+			    document.getElementById('admin-nama').value = config.nama_lengkap || defaultConfig.nama_lengkap;
+			    document.getElementById('admin-tempat').value = config.tempat_lahir || defaultConfig.tempat_lahir;
+			    document.getElementById('admin-tanggal').value = config.tanggal_lahir || defaultConfig.tanggal_lahir;
+			    document.getElementById('admin-pendidikan').value = config.riwayat_pendidikan || defaultConfig.riwayat_pendidikan;
+			    document.getElementById('admin-pekerjaan').value = config.riwayat_pekerjaan || defaultConfig.riwayat_pekerjaan;
+			}
+
+			async function saveAdminChanges(event) {
+			    event.preventDefault();
+
+			    const saveBtn = document.getElementById('admin-save-btn');
+			    const saveText = document.getElementById('admin-save-text');
+			    const spinner = document.getElementById('admin-save-spinner');
+
+			    // Show loading
+			    saveBtn.disabled = true;
+			    saveText.textContent = 'Menyimpan...';
+			    spinner.classList.remove('hidden');
+
+			    // Get form data
+			    const formData = {
+			        nama_lengkap: document.getElementById('admin-nama').value,
+			        tempat_lahir: document.getElementById('admin-tempat').value,
+			        tanggal_lahir: document.getElementById('admin-tanggal').value,
+			        riwayat_pendidikan: document.getElementById('admin-pendidikan').value,
+			        riwayat_pekerjaan: document.getElementById('admin-pekerjaan').value
+			    };
+
+			    // Update via Element SDK
+			    if (window.elementSdk) {
+			        await window.elementSdk.setConfig(formData);
+
+			        // Also save to Data SDK for backup
+			        if (window.dataSdk) {
+			            const adminRecord = {
+			                id: 'admin-data',
+			                type: 'admin',
+			                ...formData,
+			                updated_at: new Date().toISOString()
+			            };
+
+			            if (adminData) {
+			                // Update existing
+			                await window.dataSdk.update({ ...adminData, ...adminRecord });
+			            } else {
+			                // Create new
+			                await window.dataSdk.create(adminRecord);
+			            }
+			        }
+
+			        showCustomModal('Berhasil', 'Data profil berhasil diperbarui!', 'success');
+			    }
+
+			    // Reset button
+			    saveBtn.disabled = false;
+			    saveText.textContent = 'Simpan Perubahan';
+			    spinner.classList.add('hidden');
+			}
+
+			// Class management functions
+			function showAddClassModal() {
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Tambah Kelas Baru</h3>
+			            <form onsubmit="addNewClass(event)" class="space-y-4">
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Kelas</label>
+			                    <input type="text" id="class-name" required
+			                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                           placeholder="Contoh: Kelas 10A">
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+			                    <textarea id="class-description" rows="3"
+			                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                              placeholder="Deskripsi kelas (opsional)"></textarea>
+			                </div>
+			                <div class="flex gap-3 pt-4">
+			                    <button type="button" onclick="this.closest('.fixed').remove()"
+			                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Batal
+			                    </button>
+			                    <button type="submit"
+			                            class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Tambah Kelas
+			                    </button>
+			                </div>
+			            </form>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			    document.getElementById('class-name').focus();
+			}
+
+			async function addNewClass(event) {
+			    event.preventDefault();
+
+			    if (allData.length >= 999) {
+			        showCustomModal('Batas Tercapai', 'Maksimum 999 data telah tercapai. Hapus beberapa data terlebih dahulu.', 'error');
+			        return;
+			    }
+
+			    const className = document.getElementById('class-name').value;
+			    const classDescription = document.getElementById('class-description').value;
+
+			    const classData = {
+			        id: Date.now().toString(),
+			        type: 'class',
+			        kelas_nama: className,
+			        deskripsi: classDescription,
+			        created_at: new Date().toISOString()
+			    };
+
+			    if (window.dataSdk) {
+			        const result = await window.dataSdk.create(classData);
+			        if (result.isOk) {
+			            showCustomModal('Berhasil', 'Kelas berhasil ditambahkan!', 'success');
+			            event.target.closest('.fixed').remove();
+			        } else {
+			            showCustomModal('Error', 'Gagal menambahkan kelas. Silakan coba lagi.', 'error');
+			        }
+			    }
+			}
+
+			function renderClasses() {
+			    const container = document.getElementById('classes-container');
+			    const noClasses = document.getElementById('no-classes');
+
+			    if (allClasses.length === 0) {
+			        noClasses.classList.remove('hidden');
+			        // Clear existing class cards
+			        container.querySelectorAll('.class-card').forEach(card => card.remove());
+			    } else {
+			        noClasses.classList.add('hidden');
+
+			        // Clear existing class cards
+			        container.querySelectorAll('.class-card').forEach(card => card.remove());
+
+			        allClasses.forEach(classItem => {
+			            const studentCount = allStudents.filter(s => s.kelas_id === classItem.id).length;
+
+			            const classCard = document.createElement('div');
+			            classCard.className = 'class-card bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300';
+			            classCard.innerHTML = `
+			                <div class="flex items-center justify-between mb-4">
+			                    <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+			                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+			                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"></path>
+			                        </svg>
+			                    </div>
+			                    <button onclick="deleteClass('${classItem.id}')" class="text-red-500 hover:text-red-700">
+			                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+			                            <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+			                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+			                        </svg>
+			                    </button>
+			                </div>
+			                <h4 class="font-bold text-gray-800 text-lg mb-2">${classItem.kelas_nama}</h4>
+			                <p class="text-sm text-gray-600 mb-4">${classItem.deskripsi || 'Tidak ada deskripsi'}</p>
+			                <div class="flex items-center justify-between text-sm">
+			                    <span class="text-gray-500">${studentCount} siswa</span>
+			                    <span class="text-gray-400">${new Date(classItem.created_at).toLocaleDateString('id-ID')}</span>
+			                </div>
+			            `;
+			            container.appendChild(classCard);
+			        });
+			    }
+			}
+
+			async function deleteClass(classId) {
+			    const classItem = allClasses.find(c => c.id === classId);
+			    if (!classItem) return;
+
+			    // Create confirmation modal
+			    const confirmModal = document.createElement('div');
+			    confirmModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+			    confirmModal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-md mx-4">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi Hapus</h3>
+			            <p class="text-gray-600 mb-6">Yakin ingin menghapus kelas "${classItem.kelas_nama}"? Tindakan ini tidak dapat dibatalkan.</p>
+			            <div class="flex gap-3">
+			                <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                    Batal
+			                </button>
+			                <button onclick="confirmDeleteClass('${classId}'); this.closest('.fixed').remove()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                    Hapus
+			                </button>
+			            </div>
+			        </div>
+			    `;
+			    document.body.appendChild(confirmModal);
+			}
+
+			async function confirmDeleteClass(classId) {
+			    if (window.dataSdk) {
+			        const classItem = allClasses.find(c => c.id === classId);
+			        if (classItem) {
+			            const result = await window.dataSdk.delete(classItem);
+			            if (result.isOk) {
+			                showCustomModal('Berhasil', 'Kelas berhasil dihapus!', 'success');
+			            } else {
+			                showCustomModal('Error', 'Gagal menghapus kelas. Silakan coba lagi.', 'error');
+			            }
+			        }
+			    }
+			}
+
+			// Student management functions
+			function showAddStudentModal() {
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+
+			    const classOptions = allClasses.map(c => `<option value="${c.id}">${c.kelas_nama}</option>`).join('');
+
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Tambah Siswa Baru</h3>
+			            <form onsubmit="addNewStudent(event)" class="space-y-4">
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Induk</label>
+			                    <input type="text" id="student-nomor" required
+			                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                           placeholder="Contoh: 2024001">
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+			                    <input type="text" id="student-nama" required
+			                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                           placeholder="Nama lengkap siswa">
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+			                    <input type="email" id="student-email" required
+			                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                           placeholder="email@example.com">
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+			                    <select id="student-kelas" required
+			                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+			                        <option value="">Pilih Kelas</option>
+			                        ${classOptions}
+			                    </select>
+			                </div>
+			                <div class="flex gap-3 pt-4">
+			                    <button type="button" onclick="this.closest('.fixed').remove()"
+			                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Batal
+			                    </button>
+			                    <button type="submit"
+			                            class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Tambah Siswa
+			                    </button>
+			                </div>
+			            </form>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			    document.getElementById('student-nomor').focus();
+			}
+
+			async function addNewStudent(event) {
+			    event.preventDefault();
+
+			    if (allData.length >= 999) {
+			        showCustomModal('Batas Tercapai', 'Maksimum 999 data telah tercapai. Hapus beberapa data terlebih dahulu.', 'error');
+			        return;
+			    }
+
+			    const nomorInduk = document.getElementById('student-nomor').value;
+			    const nama = document.getElementById('student-nama').value;
+			    const email = document.getElementById('student-email').value;
+			    const kelasId = document.getElementById('student-kelas').value;
+
+			    // Check if nomor induk already exists
+			    const existingStudent = allStudents.find(s => s.nomor_induk === nomorInduk);
+			    if (existingStudent) {
+			        showCustomModal('Error', 'Nomor induk sudah digunakan. Gunakan nomor induk yang berbeda.', 'error');
+			        return;
+			    }
+
+			    const kelas = allClasses.find(c => c.id === kelasId);
+
+			    const studentData = {
+			        id: Date.now().toString(),
+			        type: 'student',
+			        nomor_induk: nomorInduk,
+			        nama: nama,
+			        email: email,
+			        kelas_id: kelasId,
+			        kelas_nama: kelas ? kelas.kelas_nama : '',
+			        created_at: new Date().toISOString()
+			    };
+
+			    if (window.dataSdk) {
+			        const result = await window.dataSdk.create(studentData);
+			        if (result.isOk) {
+			            showCustomModal('Berhasil', 'Siswa berhasil ditambahkan!', 'success');
+			            event.target.closest('.fixed').remove();
+			        } else {
+			            showCustomModal('Error', 'Gagal menambahkan siswa. Silakan coba lagi.', 'error');
+			        }
+			    }
+			}
+
+			function renderStudents() {
+			    const noStudents = document.getElementById('no-students');
+			    const studentsTable = document.getElementById('students-table');
+			    const tbody = document.getElementById('students-tbody');
+
+			    if (allStudents.length === 0) {
+			        noStudents.classList.remove('hidden');
+			        studentsTable.classList.add('hidden');
+			    } else {
+			        noStudents.classList.add('hidden');
+			        studentsTable.classList.remove('hidden');
+
+			        tbody.innerHTML = '';
+			        allStudents.forEach(student => {
+			            const row = document.createElement('tr');
+			            row.innerHTML = `
+			                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${student.nomor_induk}</td>
+			                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${student.nama}</td>
+			                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${student.email}</td>
+			                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${student.kelas_nama}</td>
+			                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+			                    <button onclick="deleteStudent('${student.id}')" class="text-red-600 hover:text-red-900">
+			                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+			                            <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+			                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+			                        </svg>
+			                    </button>
+			                </td>
+			            `;
+			            tbody.appendChild(row);
+			        });
+			    }
+			}
+
+			async function deleteStudent(studentId) {
+			    const student = allStudents.find(s => s.id === studentId);
+			    if (!student) return;
+
+			    // Create confirmation modal
+			    const confirmModal = document.createElement('div');
+			    confirmModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+			    confirmModal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-md mx-4">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi Hapus</h3>
+			            <p class="text-gray-600 mb-6">Yakin ingin menghapus siswa "${student.nama}"? Tindakan ini tidak dapat dibatalkan.</p>
+			            <div class="flex gap-3">
+			                <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                    Batal
+			                </button>
+			                <button onclick="confirmDeleteStudent('${studentId}'); this.closest('.fixed').remove()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                    Hapus
+			                </button>
+			            </div>
+			        </div>
+			    `;
+			    document.body.appendChild(confirmModal);
+			}
+
+			async function confirmDeleteStudent(studentId) {
+			    if (window.dataSdk) {
+			        const student = allStudents.find(s => s.id === studentId);
+			        if (student) {
+			            const result = await window.dataSdk.delete(student);
+			            if (result.isOk) {
+			                showCustomModal('Berhasil', 'Siswa berhasil dihapus!', 'success');
+			            } else {
+			                showCustomModal('Error', 'Gagal menghapus siswa. Silakan coba lagi.', 'error');
+			            }
+			        }
+			    }
+			}
+
+			// Material management functions
+			function showAddMaterialModal() {
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Tambah Materi Baru</h3>
+			            <form onsubmit="addNewMaterial(event)" class="space-y-4">
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Materi</label>
+			                    <input type="text" id="material-judul" required
+			                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                           placeholder="Contoh: Pengenalan HTML">
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+			                    <textarea id="material-deskripsi" rows="3"
+			                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                              placeholder="Deskripsi singkat materi"></textarea>
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Konten Materi</label>
+			                    <textarea id="material-konten" rows="8" required
+			                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                              placeholder="Tulis konten materi pembelajaran di sini..."></textarea>
+			                </div>
+			                <div class="flex gap-3 pt-4">
+			                    <button type="button" onclick="this.closest('.fixed').remove()"
+			                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Batal
+			                    </button>
+			                    <button type="submit"
+			                            class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Tambah Materi
+			                    </button>
+			                </div>
+			            </form>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			    document.getElementById('material-judul').focus();
+			}
+
+			async function addNewMaterial(event) {
+			    event.preventDefault();
+
+			    if (allData.length >= 999) {
+			        showCustomModal('Batas Tercapai', 'Maksimum 999 data telah tercapai. Hapus beberapa data terlebih dahulu.', 'error');
+			        return;
+			    }
+
+			    const judul = document.getElementById('material-judul').value;
+			    const deskripsi = document.getElementById('material-deskripsi').value;
+			    const konten = document.getElementById('material-konten').value;
+
+			    const materialData = {
+			        id: Date.now().toString(),
+			        type: 'material',
+			        judul: judul,
+			        deskripsi: deskripsi,
+			        konten: konten,
+			        created_at: new Date().toISOString()
+			    };
+
+			    if (window.dataSdk) {
+			        const result = await window.dataSdk.create(materialData);
+			        if (result.isOk) {
+			            showCustomModal('Berhasil', 'Materi berhasil ditambahkan!', 'success');
+			            event.target.closest('.fixed').remove();
+			        } else {
+			            showCustomModal('Error', 'Gagal menambahkan materi. Silakan coba lagi.', 'error');
+			        }
+			    }
+			}
+
+			function renderMaterials() {
+			    const container = document.getElementById('materials-container');
+			    const noMaterials = document.getElementById('no-materials');
+
+			    if (allMaterials.length === 0) {
+			        noMaterials.classList.remove('hidden');
+			        // Clear existing material cards
+			        container.querySelectorAll('.material-card').forEach(card => card.remove());
+			    } else {
+			        noMaterials.classList.add('hidden');
+
+			        // Clear existing material cards
+			        container.querySelectorAll('.material-card').forEach(card => card.remove());
+
+			        allMaterials.forEach(material => {
+			            const materialCard = document.createElement('div');
+			            materialCard.className = 'material-card bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300';
+			            materialCard.innerHTML = `
+			                <div class="flex items-center justify-between mb-4">
+			                    <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+			                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+			                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
+			                        </svg>
+			                    </div>
+			                    <div class="flex gap-2">
+			                        <button onclick="editMaterial('${material.id}')" class="text-blue-500 hover:text-blue-700">
+			                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+			                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+			                            </svg>
+			                        </button>
+			                        <button onclick="deleteMaterial('${material.id}')" class="text-red-500 hover:text-red-700">
+			                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+			                                <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+			                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+			                            </svg>
+			                        </button>
+			                    </div>
+			                </div>
+			                <h4 class="font-bold text-gray-800 text-lg mb-2">${material.judul}</h4>
+			                <p class="text-sm text-gray-600 mb-4">${material.deskripsi || 'Tidak ada deskripsi'}</p>
+			                <div class="text-sm text-gray-400">
+			                    ${new Date(material.created_at).toLocaleDateString('id-ID')}
+			                </div>
+			            `;
+			            container.appendChild(materialCard);
+			        });
+			    }
+			}
+
+			function renderPublicMaterials() {
+			    const container = document.getElementById('public-materials-container');
+			    const noMaterials = document.getElementById('no-public-materials');
+
+			    if (allMaterials.length === 0) {
+			        noMaterials.classList.remove('hidden');
+			        // Clear existing material cards
+			        container.querySelectorAll('.public-material-card').forEach(card => card.remove());
+			    } else {
+			        noMaterials.classList.add('hidden');
+
+			        // Clear existing material cards
+			        container.querySelectorAll('.public-material-card').forEach(card => card.remove());
+
+			        allMaterials.forEach((material, index) => {
+			            const colors = ['blue', 'green', 'purple', 'indigo', 'pink'];
+			            const color = colors[index % colors.length];
+
+			            const materialCard = document.createElement('div');
+			            materialCard.className = `public-material-card bg-gradient-to-br from-${color}-50 to-${color}-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300`;
+			            materialCard.innerHTML = `
+			                <div class="flex items-center gap-4 mb-4">
+			                    <div class="w-12 h-12 bg-${color}-500 rounded-lg flex items-center justify-center">
+			                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+			                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+			                        </svg>
+			                    </div>
+			                    <div>
+			                        <h3 class="font-bold text-gray-800">${material.judul}</h3>
+			                        <p class="text-sm text-gray-600">${material.deskripsi || 'Materi pembelajaran'}</p>
+			                    </div>
+			                </div>
+			                <button onclick="openMaterial('${material.id}')" class="w-full bg-${color}-500 hover:bg-${color}-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                    Buka Materi
+			                </button>
+			            `;
+			            container.appendChild(materialCard);
+			        });
+			    }
+			}
+
+			function openMaterial(materialId) {
+			    const material = allMaterials.find(m => m.id === materialId);
+			    if (!material) return;
+
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+			            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+			                <h3 class="text-2xl font-bold text-gray-800">${material.judul}</h3>
+			                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+			                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+			                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+			                    </svg>
+			                </button>
+			            </div>
+			            <div class="p-6 overflow-y-auto flex-1">
+			                ${material.deskripsi ? `<p class="text-gray-600 mb-6 text-lg">${material.deskripsi}</p>` : ''}
+			                <div class="prose max-w-none">
+			                    <div class="whitespace-pre-wrap text-gray-700 leading-relaxed">${material.konten}</div>
+			                </div>
+			            </div>
+			            <div class="p-6 border-t border-gray-200">
+			                <button onclick="this.closest('.fixed').remove()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+			                    Tutup
+			                </button>
+			            </div>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			}
+
+			function editMaterial(materialId) {
+			    const material = allMaterials.find(m => m.id === materialId);
+			    if (!material) return;
+
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Edit Materi</h3>
+			            <form onsubmit="updateMaterial(event, '${material.id}')" class="space-y-4">
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Judul Materi</label>
+			                    <input type="text" id="edit-material-judul" required value="${material.judul}"
+			                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+			                    <textarea id="edit-material-deskripsi" rows="3"
+			                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">${material.deskripsi || ''}</textarea>
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Konten Materi</label>
+			                    <textarea id="edit-material-konten" rows="8" required
+			                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">${material.konten}</textarea>
+			                </div>
+			                <div class="flex gap-3 pt-4">
+			                    <button type="button" onclick="this.closest('.fixed').remove()"
+			                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Batal
+			                    </button>
+			                    <button type="submit"
+			                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Simpan Perubahan
+			                    </button>
+			                </div>
+			            </form>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			    document.getElementById('edit-material-judul').focus();
+			}
+
+			async function updateMaterial(event, materialId) {
+			    event.preventDefault();
+
+			    const judul = document.getElementById('edit-material-judul').value;
+			    const deskripsi = document.getElementById('edit-material-deskripsi').value;
+			    const konten = document.getElementById('edit-material-konten').value;
+
+			    const material = allMaterials.find(m => m.id === materialId);
+			    if (!material) return;
+
+			    const updatedMaterial = {
+			        ...material,
+			        judul: judul,
+			        deskripsi: deskripsi,
+			        konten: konten,
+			        updated_at: new Date().toISOString()
+			    };
+
+			    if (window.dataSdk) {
+			        const result = await window.dataSdk.update(updatedMaterial);
+			        if (result.isOk) {
+			            showCustomModal('Berhasil', 'Materi berhasil diperbarui!', 'success');
+			            event.target.closest('.fixed').remove();
+			        } else {
+			            showCustomModal('Error', 'Gagal memperbarui materi. Silakan coba lagi.', 'error');
+			        }
+			    }
+			}
+
+			async function deleteMaterial(materialId) {
+			    const material = allMaterials.find(m => m.id === materialId);
+			    if (!material) return;
+
+			    // Create confirmation modal
+			    const confirmModal = document.createElement('div');
+			    confirmModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+			    confirmModal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-md mx-4">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi Hapus</h3>
+			            <p class="text-gray-600 mb-6">Yakin ingin menghapus materi "${material.judul}"? Tindakan ini tidak dapat dibatalkan.</p>
+			            <div class="flex gap-3">
+			                <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                    Batal
+			                </button>
+			                <button onclick="confirmDeleteMaterial('${materialId}'); this.closest('.fixed').remove()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                    Hapus
+			                </button>
+			            </div>
+			        </div>
+			    `;
+			    document.body.appendChild(confirmModal);
+			}
+
+			async function confirmDeleteMaterial(materialId) {
+			    if (window.dataSdk) {
+			        const material = allMaterials.find(m => m.id === materialId);
+			        if (material) {
+			            const result = await window.dataSdk.delete(material);
+			            if (result.isOk) {
+			                showCustomModal('Berhasil', 'Materi berhasil dihapus!', 'success');
+			            } else {
+			                showCustomModal('Error', 'Gagal menghapus materi. Silakan coba lagi.', 'error');
+			            }
+			        }
+			    }
+			}
+
+			// Exercise management functions
+			function showAddExerciseModal() {
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Tambah Latihan Soal Baru</h3>
+			            <form onsubmit="addNewExercise(event)" class="space-y-4">
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Latihan</label>
+			                    <input type="text" id="exercise-nama" required
+			                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                           placeholder="Contoh: Latihan HTML Dasar">
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+			                    <textarea id="exercise-deskripsi" rows="3"
+			                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                              placeholder="Deskripsi latihan soal"></textarea>
+			                </div>
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Durasi (menit)</label>
+			                    <input type="number" id="exercise-durasi" min="1" max="180" value="30"
+			                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+			                </div>
+			                <div class="flex gap-3 pt-4">
+			                    <button type="button" onclick="this.closest('.fixed').remove()"
+			                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Batal
+			                    </button>
+			                    <button type="submit"
+			                            class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Tambah Latihan
+			                    </button>
+			                </div>
+			            </form>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			    document.getElementById('exercise-nama').focus();
+			}
+
+			async function addNewExercise(event) {
+			    event.preventDefault();
+
+			    if (allData.length >= 999) {
+			        showCustomModal('Batas Tercapai', 'Maksimum 999 data telah tercapai. Hapus beberapa data terlebih dahulu.', 'error');
+			        return;
+			    }
+
+			    const nama = document.getElementById('exercise-nama').value;
+			    const deskripsi = document.getElementById('exercise-deskripsi').value;
+			    const durasi = parseInt(document.getElementById('exercise-durasi').value);
+
+			    const exerciseData = {
+			        id: Date.now().toString(),
+			        type: 'exercise',
+			        latihan_nama: nama,
+			        deskripsi: deskripsi,
+			        durasi: durasi,
+			        created_at: new Date().toISOString()
+			    };
+
+			    if (window.dataSdk) {
+			        const result = await window.dataSdk.create(exerciseData);
+			        if (result.isOk) {
+			            showCustomModal('Berhasil', 'Latihan soal berhasil ditambahkan! Sekarang Anda dapat menambahkan soal-soal.', 'success');
+			            event.target.closest('.fixed').remove();
+			        } else {
+			            showCustomModal('Error', 'Gagal menambahkan latihan soal. Silakan coba lagi.', 'error');
+			        }
+			    }
+			}
+
+			function renderExercises() {
+			    const container = document.getElementById('exercises-container');
+			    const noExercises = document.getElementById('no-exercises');
+
+			    if (allExercises.length === 0) {
+			        noExercises.classList.remove('hidden');
+			        // Clear existing exercise cards
+			        container.querySelectorAll('.exercise-card').forEach(card => card.remove());
+			    } else {
+			        noExercises.classList.add('hidden');
+
+			        // Clear existing exercise cards
+			        container.querySelectorAll('.exercise-card').forEach(card => card.remove());
+
+			        allExercises.forEach(exercise => {
+			            const questions = allQuestions.filter(q => q.latihan_id === exercise.id);
+			            const scores = allScores.filter(s => s.latihan_id === exercise.id);
+
+			            const exerciseCard = document.createElement('div');
+			            exerciseCard.className = 'exercise-card bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-300';
+			            exerciseCard.innerHTML = `
+			                <div class="flex items-center justify-between mb-4">
+			                    <div class="flex items-center gap-3">
+			                        <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+			                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+			                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+			                            </svg>
+			                        </div>
+			                        <div>
+			                            <h4 class="font-bold text-gray-800 text-lg">${exercise.latihan_nama}</h4>
+			                            <p class="text-sm text-gray-600">${exercise.deskripsi || 'Tidak ada deskripsi'}</p>
+			                        </div>
+			                    </div>
+			                    <div class="flex gap-2">
+			                        <button onclick="editExercise('${exercise.id}')" class="text-blue-500 hover:text-blue-700">
+			                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+			                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+			                            </svg>
+			                        </button>
+			                        <button onclick="deleteExercise('${exercise.id}')" class="text-red-500 hover:text-red-700">
+			                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+			                                <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+			                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+			                            </svg>
+			                        </button>
+			                    </div>
+			                </div>
+
+			                <div class="grid grid-cols-3 gap-4 mb-4">
+			                    <div class="text-center">
+			                        <p class="text-2xl font-bold text-blue-600">${questions.length}</p>
+			                        <p class="text-xs text-gray-500">Soal</p>
+			                    </div>
+			                    <div class="text-center">
+			                        <p class="text-2xl font-bold text-green-600">${exercise.durasi}</p>
+			                        <p class="text-xs text-gray-500">Menit</p>
+			                    </div>
+			                    <div class="text-center">
+			                        <p class="text-2xl font-bold text-purple-600">${scores.length}</p>
+			                        <p class="text-xs text-gray-500">Nilai</p>
+			                    </div>
+			                </div>
+
+			                <div class="flex gap-2">
+			                    <button onclick="manageQuestions('${exercise.id}')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm">
+			                        Kelola Soal
+			                    </button>
+			                    <button onclick="viewExerciseScores('${exercise.id}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-3 rounded-lg transition-colors text-sm">
+			                        Lihat Nilai
+			                    </button>
+			                </div>
+
+			                <div class="text-xs text-gray-400 mt-4">
+			                    Dibuat: ${new Date(exercise.created_at).toLocaleDateString('id-ID')}
+			                </div>
+			            `;
+			            container.appendChild(exerciseCard);
+			        });
+			    }
+			}
+
+			function manageQuestions(exerciseId) {
+			    const exercise = allExercises.find(e => e.id === exerciseId);
+			    if (!exercise) return;
+
+			    const questions = allQuestions.filter(q => q.latihan_id === exerciseId);
+
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+			            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+			                <h3 class="text-2xl font-bold text-gray-800">Kelola Soal: ${exercise.latihan_nama}</h3>
+			                <div class="flex items-center gap-3">
+			                    <button onclick="addQuestion('${exerciseId}')" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        <svg class="w-4 h-4 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
+			                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+			                        </svg>
+			                        Tambah Soal
+			                    </button>
+			                    <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+			                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+			                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+			                        </svg>
+			                    </button>
+			                </div>
+			            </div>
+			            <div class="p-6 overflow-y-auto flex-1">
+			                <div id="questions-list-${exerciseId}">
+			                    ${questions.length === 0 ? `
+			                        <div class="text-center py-12">
+			                            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+			                            </svg>
+			                            <h4 class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Soal</h4>
+			                            <p class="text-gray-500">Tambahkan soal pertama untuk latihan ini</p>
+			                        </div>
+			                    ` : questions.map((q, index) => `
+			                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+			                            <div class="flex items-start justify-between mb-3">
+			                                <h5 class="font-semibold text-gray-800">Soal ${index + 1}</h5>
+			                                <div class="flex gap-2">
+			                                    <button onclick="editQuestion('${q.id}')" class="text-blue-500 hover:text-blue-700">
+			                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+			                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+			                                        </svg>
+			                                    </button>
+			                                    <button onclick="deleteQuestion('${q.id}')" class="text-red-500 hover:text-red-700">
+			                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+			                                            <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+			                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+			                                        </svg>
+			                                    </button>
+			                                </div>
+			                            </div>
+			                            <p class="text-gray-700 mb-3">${q.soal}</p>
+			                            <div class="grid grid-cols-2 gap-2 text-sm">
+			                                <div class="flex items-center gap-2">
+			                                    <span class="${q.jawaban_benar === 'A' ? 'text-green-600 font-semibold' : 'text-gray-600'}">A.</span>
+			                                    <span class="${q.jawaban_benar === 'A' ? 'text-green-600 font-semibold' : 'text-gray-600'}">${q.pilihan_a}</span>
+			                                </div>
+			                                <div class="flex items-center gap-2">
+			                                    <span class="${q.jawaban_benar === 'B' ? 'text-green-600 font-semibold' : 'text-gray-600'}">B.</span>
+			                                    <span class="${q.jawaban_benar === 'B' ? 'text-green-600 font-semibold' : 'text-gray-600'}">${q.pilihan_b}</span>
+			                                </div>
+			                                <div class="flex items-center gap-2">
+			                                    <span class="${q.jawaban_benar === 'C' ? 'text-green-600 font-semibold' : 'text-gray-600'}">C.</span>
+			                                    <span class="${q.jawaban_benar === 'C' ? 'text-green-600 font-semibold' : 'text-gray-600'}">${q.pilihan_c}</span>
+			                                </div>
+			                                <div class="flex items-center gap-2">
+			                                    <span class="${q.jawaban_benar === 'D' ? 'text-green-600 font-semibold' : 'text-gray-600'}">D.</span>
+			                                    <span class="${q.jawaban_benar === 'D' ? 'text-green-600 font-semibold' : 'text-gray-600'}">${q.pilihan_d}</span>
+			                                </div>
+			                            </div>
+			                        </div>
+			                    `).join('')}
+			                </div>
+			            </div>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			}
+
+			function addQuestion(exerciseId) {
+			    const modal = document.createElement('div');
+			    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+			    modal.innerHTML = `
+			        <div class="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+			            <h3 class="text-xl font-bold text-gray-800 mb-4">Tambah Soal Baru</h3>
+			            <form onsubmit="saveNewQuestion(event, '${exerciseId}')" class="space-y-4">
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Pertanyaan</label>
+			                    <textarea id="question-soal" rows="3" required
+			                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                              placeholder="Tulis pertanyaan di sini..."></textarea>
+			                </div>
+
+			                <div class="grid md:grid-cols-2 gap-4">
+			                    <div>
+			                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilihan A</label>
+			                        <input type="text" id="question-a" required
+			                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                               placeholder="Pilihan A">
+			                    </div>
+			                    <div>
+			                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilihan B</label>
+			                        <input type="text" id="question-b" required
+			                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                               placeholder="Pilihan B">
+			                    </div>
+			                    <div>
+			                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilihan C</label>
+			                        <input type="text" id="question-c" required
+			                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                               placeholder="Pilihan C">
+			                    </div>
+			                    <div>
+			                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilihan D</label>
+			                        <input type="text" id="question-d" required
+			                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+			                               placeholder="Pilihan D">
+			                    </div>
+			                </div>
+
+			                <div>
+			                    <label class="block text-sm font-medium text-gray-700 mb-2">Jawaban Benar</label>
+			                    <select id="question-answer" required
+			                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+			                        <option value="">Pilih jawaban benar</option>
+			                        <option value="A">A</option>
+			                        <option value="B">B</option>
+			                        <option value="C">C</option>
+			                        <option value="D">D</option>
+			                    </select>
+			                </div>
+
+			                <div class="flex gap-3 pt-4">
+			                    <button type="button" onclick="this.closest('.fixed').remove()"
+			                            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Batal
+			                    </button>
+			                    <button type="submit"
+			                            class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+			                        Simpan Soal
+			                    </button>
+			                </div>
+			            </form>
+			        </div>
+			    `;
+			    document.body.appendChild(modal);
+			    document.getElementById('question-soal').focus();
+			}
+
+			async function saveNewQuestion(event, exerciseId) {
+			    event.preventDefault();
+
+			    if (allData.length >= 999) {
+			        showCustomModal('Batas Tercapai', 'Maksimum 999 data telah tercapai. Hapus beberapa data terlebih dahulu.', 'error');
+			        return;
+			    }
+
+			    const exercise = allExercises.find(e => e.id === exerciseId);
+
+			    const questionData = {
+			        id: Date.now().toString(),
+			        type: 'question',
+			        latihan_id: exerciseId,
+			        latihan_nama: exercise ? exercise.latihan_nama : '',
+			        soal: document.getElementById('question-soal').value,
+			        pilihan_a: document.getElementById('question-a').value,
+			        pilihan_b: document.getElementById('question-b').value,
+			        pilihan_c: document.getElementById('question-c').value,
+			        pilihan_d: document.getElementById('question-d').value,
+			        jawaban_benar: document.getElementById('question-answer').value,
+			        created_at: new Date().toISOString()
+			    };
+
+			    if (window.dataSdk) {
+			        const result = await window.dataSdk.create(questionData);
+			        if (result.isOk) {
+			            showCustomModal('Berhasil', 'Soal berhasil ditambahkan!', 'success');
+			            event.target.closest('.fixed').remove();
+			            // Refresh the questions modal
+			            setTimeout(() => {
+			                const existingModal = document.querySelector('.fixed');
+			                if (existingModal) {
+			                    existingModal.remove();
+			                    manageQuestions(exerciseId);
+			                }
+			            }, 1000);
+			        } else {
+			            showCustomModal('Error', 'Gagal menambahkan soal. Silakan coba lagi.', 'error');
+			        }
+			    }
+			}
+
+			function renderQuizList() {
+			    const container = document.getElementById('quiz-list');
+			    const noQuiz = document.getElementById('no-quiz-available');
+
+			    if (allExercises.length === 0) {
+			        noQuiz.classList.remove('hidden');
+			        container.classList.add('hidden');
+			    } else {
+			        noQuiz.classList.add('hidden');
+			        container.classList.remove('hidden');
+
+			        container.innerHTML = '';
+			        allExercises.forEach((exercise, index) => {
+			            const questions = allQuestions.filter(q => q.latihan_id === exercise.id);
+			            const colors = ['blue', 'green', 'purple', 'indigo', 'pink'];
+			            const color = colors[index % colors.length];
+
+			            const exerciseCard = document.createElement('div');
+			            exerciseCard.className = `bg-gradient-to-br from-${color}-50 to-${color}-100 rounded-xl p-6 hover:shadow-lg transition-all duration-300`;
+			            exerciseCard.innerHTML = `
+			                <div class="flex items-center gap-4 mb-4">
+			                    <div class="w-12 h-12 bg-${color}-500 rounded-lg flex items-center justify-center">
+			                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+			                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+			                        </svg>
+			                    </div>
+			                    <div>
+			                        <h3 class="font-bold text-gray-800">${exercise.latihan_nama}</h3>
+			                        <p class="text-sm text-gray-600">${exercise.deskripsi || 'Latihan soal'}</p>
+			                    </div>
+			                </div>
+			                <div class="flex items-center justify-between mb-4 text-sm text-gray-600">
+			                    <span>${questions.length} soal</span>
+			                    <span>${exercise.durasi} menit</span>
+			                </div>
+			                <button onclick="startExercise('${exercise.id}')"
+			                        class="w-full bg-${color}-500 hover:bg-${color}-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+			                        ${questions.length === 0 ? 'disabled' : ''}>
+			                    ${questions.length === 0 ? 'Belum Ada Soal' : 'Mulai Latihan'}
+			                </button>
+			            `;
+			            container.appendChild(exerciseCard);
+			        });
+			    }
+			}
+
+			function startExercise(exerciseId) {
+			    currentExercise = allExercises.find(e => e.id === exerciseId);
+			    if (!currentExercise) return;
+
+			    const questions = allQuestions.filter(q => q.latihan_id === exerciseId);
+			    if (questions.length === 0) {
+			        showCustomModal('Tidak Ada Soal', 'Latihan ini belum memiliki soal.', 'error');
+			        return;
+			    }
+
+			    // Convert questions to quiz format
+			    currentExercise.questions = questions.map(q => ({
+			        question: q.soal,
+			        options: [q.pilihan_a, q.pilihan_b, q.pilihan_c, q.pilihan_d],
+			        correct: ['A', 'B', 'C', 'D'].indexOf(q.jawaban_benar)
+			    }));
+
+			    currentQuestion = 0;
+			    userAnswers = [];
+			    quizScore = 0;
+
+			    document.getElementById('quiz-list-container').classList.add('hidden');
+			    document.getElementById('quiz-container').classList.remove('hidden');
+
+			    showQuestion();
+			}
+
+			function showQuestion() {
+			    if (!currentExercise || !currentExercise.questions) return;
+
+			    const question = currentExercise.questions[currentQuestion];
+
+			    document.getElementById('question-number').textContent = currentQuestion + 1;
+			    document.getElementById('total-questions').textContent = currentExercise.questions.length;
+			    document.getElementById('current-score').textContent = quizScore;
+			    document.getElementById('question-text').textContent = question.question;
+
+			    // Update progress bar
+			    const progress = ((currentQuestion + 1) / currentExercise.questions.length) * 100;
+			    document.getElementById('progress-bar').style.width = progress + '%';
+
+			    // Create options
+			    const optionsContainer = document.getElementById('options-container');
+			    optionsContainer.innerHTML = '';
+
+			    question.options.forEach((option, index) => {
+			        const optionDiv = document.createElement('div');
+			        optionDiv.className = 'quiz-option p-4 border border-gray-200 rounded-lg';
+			        optionDiv.textContent = option;
+			        optionDiv.onclick = () => selectOption(index, optionDiv);
+			        optionsContainer.appendChild(optionDiv);
+			    });
+
+			    // Update navigation buttons
+			    document.getElementById('prev-btn').disabled = currentQuestion === 0;
+			    document.getElementById('next-btn').disabled = true;
+			    document.getElementById('next-btn').textContent = currentQuestion === currentExercise.questions.length - 1 ? 'Selesai' : 'Selanjutnya';
+			}
+
+			function selectOption(optionIndex, optionElement) {
+			    // Remove previous selections
+			    document.querySelectorAll('.quiz-option').forEach(opt => {
+			        opt.classList.remove('selected');
+			    });
+
+			    // Mark selected option
+			    optionElement.classList.add('selected');
+			    userAnswers[currentQuestion] = optionIndex;
+
+			    // Enable next button
+			    document.getElementById('next-btn').disabled = false;
+			}
+
+			function nextQuestion() {
+			    if (userAnswers[currentQuestion] !== undefined) {
+			        // Check if answer is correct
+			        if (userAnswers[currentQuestion] === currentExercise.questions[currentQuestion].correct) {
+			            quizScore += Math.round(100 / currentExercise.questions.length);
+			        }
+
+			        if (currentQuestion < currentExercise.questions.length - 1) {
+			            currentQuestion++;
+			            showQuestion();
+			        } else {
+			            showResult();
+			        }
+			    }
+			}
+
+			function previousQuestion() {
+			    if (currentQuestion > 0) {
+			        currentQuestion--;
+			        showQuestion();
+
+			        // Restore previous answer if exists
+			        if (userAnswers[currentQuestion] !== undefined) {
+			            const options = document.querySelectorAll('.quiz-option');
+			            options[userAnswers[currentQuestion]].classList.add('selected');
+			            document.getElementById('next-btn').disabled = false;
+			        }
+			    }
+			}
+
+			function showResult() {
+			    document.getElementById('quiz-question').classList.add('hidden');
+			    document.getElementById('quiz-result').classList.remove('hidden');
+
+			    document.getElementById('final-score').textContent = quizScore;
+
+			    let message = '';
+			    if (quizScore >= 80) {
+			        message = 'Excellent! Anda menguasai materi dengan baik.';
+			    } else if (quizScore >= 60) {
+			        message = 'Good! Anda cukup memahami materi.';
+			    } else {
+			        message = 'Perlu belajar lebih giat lagi.';
+			    }
+
+			    document.getElementById('score-message').textContent = message;
+			}
+
+			async function saveScore() {
+			    if (allData.length >= 999) {
+			        showCustomModal('Batas Tercapai', 'Maksimum 999 nilai telah tercapai. Hapus beberapa nilai terlebih dahulu.', 'error');
+			        return;
+			    }
+
+			    const saveBtn = document.getElementById('save-score-btn');
+			    const saveText = document.getElementById('save-text');
+			    const saveSpinner = document.getElementById('save-spinner');
+
+			    // Show loading state
+			    saveBtn.disabled = true;
+			    saveText.textContent = 'Menyimpan...';
+			    saveSpinner.classList.remove('hidden');
+
+			    const scoreData = {
+			        id: Date.now().toString(),
+			        type: 'score',
+			        nama: window.elementSdk?.config?.nama_lengkap || defaultConfig.nama_lengkap,
+			        latihan_id: currentExercise.id,
+			        latihan_nama: currentExercise.latihan_nama,
+			        nilai: quizScore,
+			        tanggal: new Date().toISOString()
+			    };
+
+			    if (window.dataSdk) {
+			        const result = await window.dataSdk.create(scoreData);
+
+			        if (result.isOk) {
+			            showCustomModal('Berhasil', 'Nilai berhasil disimpan ke Canva Sheet!', 'success');
+			        } else {
+			            showCustomModal('Error', 'Gagal menyimpan nilai. Silakan coba lagi.', 'error');
+			        }
+			    }
+
+			    // Reset button state
+			    saveBtn.disabled = false;
+			    saveText.textContent = 'Simpan Nilai';
+			    saveSpinner.classList.add('hidden');
+			}
+
+			function backToQuizList() {
+			    document.getElementById('quiz-container').classList.add('hidden');
+			    document.getElementById('quiz-list-container').classList.remove('hidden');
+			    document.getElementById('quiz-question').classList.remove('hidden');
+			    document.getElementById('quiz-result').classList.add('hidden');
+			}
+
+			function renderScores() {
+			    const noScores = document.getElementById('no-scores');
+			    const scoresTable = document.getElementById('scores-table');
+			    const tbody = document.getElementById('scores-tbody');
+
+			    if (allScores.length === 0) {
+			        noScores.classList.remove('hidden');
+			        scoresTable.classList.add('hidden');
+			    } else {
+			        noScores.classList.add('hidden');
+			        scoresTable.classList.remove('hidden');
+
+			        tbody.innerHTML = '';
+			        allScores.forEach((score, index) => {
+			            const row = document.createElement('tr');
+			            const date = new Date(score.tanggal);
+			            const formattedDate = date.toLocaleDateString('id-ID');
+
+			            let status = '';
+			            let statusClass = '';
+			            if (score.nilai >= 80) {
+			                status = 'Excellent';
+			                statusClass = 'text-green-600 bg-green-100';
+			            } else if (score.nilai >= 60) {
+			                status = 'Good';
+			                statusClass = 'text-blue-600 bg-blue-100';
+			            } else {
+			                status = 'Perlu Belajar';
+			                statusClass = 'text-red-600 bg-red-100';
+			            }
+
+			            row.innerHTML = `
+			                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
+			                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formattedDate}</td>
+			                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900
+		</script>
+		<script>
+			(function () {
+				function c() {
+					var b = a.contentDocument || a.contentWindow.document;
+					if (b) {
+						var d = b.createElement("script");
+						d.innerHTML =
+							"window.__CF$cv$params={r:'99e35e1d16e422a1',t:'MTc2MzA5MDM3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+						b.getElementsByTagName("head")[0].appendChild(d);
+					}
+				}
+				if (document.body) {
+					var a = document.createElement("iframe");
+					a.height = 1;
+					a.width = 1;
+					a.style.position = "absolute";
+					a.style.top = 0;
+					a.style.left = 0;
+					a.style.border = "none";
+					a.style.visibility = "hidden";
+					document.body.appendChild(a);
+					if ("loading" !== document.readyState) c();
+					else if (window.addEventListener)
+						document.addEventListener("DOMContentLoaded", c);
+					else {
+						var e = document.onreadystatechange || function () {};
+						document.onreadystatechange = function (b) {
+							e(b);
+							"loading" !== document.readyState &&
+								((document.onreadystatechange = e), c());
+						};
+					}
+				}
+			})();
+		</script>
+	</body>
+</html>

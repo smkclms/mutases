@@ -375,8 +375,8 @@ for ($i = 2; $i <= 300; $i++) {
 }
 
 
-  // IMPORT EXCEL
- public function import_excel()
+ // IMPORT EXCEL (versi tolerant header + auto siswa_tahun)
+public function import_excel()
 {
     if (!isset($_FILES['file']['name'])) {
         redirect('siswa');
@@ -387,7 +387,7 @@ for ($i = 2; $i <= 300; $i++) {
     $path = $_FILES['file']['tmp_name'];
     $objPHPExcel = PHPExcel_IOFactory::load($path);
     $sheet = $objPHPExcel->getActiveSheet();
-    $rows = $sheet->toArray(null, true, true, true); // keys A, B, C...
+    $rows = $sheet->toArray(null, true, true, true); // keys A,B,C...
 
     if (count($rows) < 2) {
         $this->session->set_flashdata('error', 'File Excel kosong atau hanya header.');
@@ -423,7 +423,6 @@ for ($i = 2; $i <= 300; $i++) {
     $colMap = []; // 'A' => 'nis', ...
     foreach ($header as $col => $text) {
         $norm = $normalize($text);
-
         if ($norm === '') continue;
 
         // Direct match against expected field names
@@ -437,15 +436,18 @@ for ($i = 2; $i <= 300; $i++) {
 
         // Some common synonyms
         $synonyms = [
-            'kelas' => ['kelas','nama_kelas','kelas_nama','id_kelas'],
-            'id_kelas' => ['idkelas','id_kelas'],
-            'tahun_id' => ['tahun','tahunajaran','tahun_ajaran','tahun_id'],
-            'tahun_ajaran' => ['tahun','tahunajaran','tahun_ajaran'],
+            'nis' => ['nis','no.nis','no nis','nomor nis'],
+            'nisn' => ['nisn','no.nisn','no nisn','nomor nisn','no nis/nisn','nis / nisn'],
+            'nik' => ['nik','no.nik','no nik'],
+            'nama' => ['nama','nama siswa','nama_lengkap'],
+            'jk' => ['jk','jenis kelamin','jenis_kelamin'],
+            'hp' => ['hp','nohp','handphone','telepon seluler'],
+            'telp' => ['telp','telepon'],
+            'id_kelas' => ['kelas','id_kelas','nama_kelas','kelas_nama','kelas id','id kelas'],
+            'tahun_id' => ['tahun','tahunajaran','tahun_ajaran','tahun id'],
             'no_kps' => ['no_kps','nokps','no kps'],
-            'anak_keberapa' => ['anakkeberapa','anak_ke','anak_ke'],
-            'nomor_kk' => ['nomorkk','no_kk','nomor kk'],
-            'hp' => ['hp','nohp','handphone'],
-            'telp' => ['telp','telepon']
+            'anak_keberapa' => ['anakkeberapa','anak_ke','anak ke'],
+            'nomor_kk' => ['nomorkk','no_kk','nomor kk','no kk'],
         ];
 
         foreach ($synonyms as $field => $variants) {
@@ -457,13 +459,13 @@ for ($i = 2; $i <= 300; $i++) {
             }
         }
 
+        if (isset($colMap[$col])) continue;
+
         // If still not matched, try matching by containing words (e.g. header "Nama Siswa" -> 'nama')
-        if (!isset($colMap[$col])) {
-            foreach ($expected_fields as $f) {
-                if (strpos($norm, $normalize($f)) !== false) {
-                    $colMap[$col] = $f;
-                    break;
-                }
+        foreach ($expected_fields as $f) {
+            if (strpos($norm, $normalize($f)) !== false) {
+                $colMap[$col] = $f;
+                break;
             }
         }
     }
@@ -530,7 +532,6 @@ for ($i = 2; $i <= 300; $i++) {
         }
 
         // Jika pengguna memakai header 'kelas' (alias) map ke id_kelas
-        // Toleransi: jika kolom kelas mengandung angka dan cocok id -> pakai; jika string -> normalisasi cari nama
         $kelasRaw = isset($data['id_kelas']) ? $data['id_kelas'] : '';
         $kelasRaw = trim((string)$kelasRaw);
 
@@ -541,8 +542,6 @@ for ($i = 2; $i <= 300; $i++) {
                 if ($kelasRow) {
                     $data['id_kelas'] = $kelasRow->id;
                 } else {
-                    // maybe user put other numeric like NIK accidentally
-                    // fall back to try match by normalized name: numeric normalized won't match, so mark error
                     $gagal[] = "Baris $rowIdx: Kelas tidak valid ('$kelasRaw'). (angka tapi id tidak ditemukan)";
                     continue;
                 }
@@ -624,12 +623,47 @@ for ($i = 2; $i <= 300; $i++) {
         $exist = $this->db->get_where('siswa', ['nisn' => $nisnVal])->row();
         if ($exist) {
             $this->db->where('nisn', $nisnVal)->update('siswa', $save);
+            $siswa_id = $exist->id;
             $update++;
         } else {
             $this->db->insert('siswa', $save);
+            $siswa_id = $this->db->insert_id();
             $insert++;
         }
-    }
+
+        // =============================================================
+        // TAMBAHKAN / UPDATE siswa_tahun
+        // =============================================================
+
+        // Pastikan kelas dan tahun tidak null
+        $kelas_id = $save['id_kelas'];
+        $tahun_id = $save['tahun_id'];
+        if ($kelas_id && $tahun_id) {
+
+            // Cek apakah data siswa_tahun sudah ada
+            $st = $this->db->get_where('siswa_tahun', [
+                'siswa_id' => $siswa_id,
+                'tahun_id' => $tahun_id
+            ])->row();
+
+            if ($st) {
+                // Update siswa_tahun saja
+                $this->db->where('id', $st->id)->update('siswa_tahun', [
+                    'kelas_id' => $kelas_id,
+                    'status'   => 'aktif'
+                ]);
+            } else {
+                // Insert baru ke siswa_tahun
+                $this->db->insert('siswa_tahun', [
+                    'siswa_id' => $siswa_id,
+                    'kelas_id' => $kelas_id,
+                    'tahun_id' => $tahun_id,
+                    'status'   => 'aktif'
+                ]);
+            }
+        }
+
+    } // END foreach rows
 
     // Build message
     if (!empty($gagal)) {
@@ -644,6 +678,7 @@ for ($i = 2; $i <= 300; $i++) {
 
     redirect('siswa');
 }
+
 public function cetak($id)
 {
     // Ambil data siswa lengkap
