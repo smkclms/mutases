@@ -97,7 +97,7 @@ th, td {
                         if ($hari == 6 || $hari == 7 || $is_libur) {
                             $kode = 'L';
                         } else {
-                            $kode = 'A';
+                            $kode = '-';
                         }
                     }
 

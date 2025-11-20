@@ -24,7 +24,8 @@ $group_data   = in_array($active, ['guru','kelas','siswa']);
 $group_mutasi = in_array($active, ['mutasi','kenaikan','siswa_keluar','siswa_lulus','laporan']);
 $group_absen  = in_array($active, ['absensi','laporan_absensi']);
 $group_izin   = in_array($active, ['izin','laporan_izin']);
-$group_setting = in_array($active, ['hari_libur','tahun']);
+$group_setting = in_array($active, ['hari_libur','tahun','jadwal_absensi']);
+$group_absenqr = in_array($active, ['absensiqr_siswa','laporan_absensiqr']);
 ?>
 
   <hr class="sidebar-divider">
@@ -83,24 +84,29 @@ $group_setting = in_array($active, ['hari_libur','tahun']);
 </li>
 
 <!-- Absensi QR -->
-<li class="nav-item <?= ($active=='absensi_qr' || $active=='laporan_absensi_qr') ? 'active' : '' ?>">
+<li class="nav-item <?= $group_absenqr ? 'active' : '' ?>">
+
     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#mAbsensiQR">
         <i class="fas fa-qrcode"></i>
         <span>Absensi QR</span>
     </a>
-    <div id="mAbsensiQR" class="collapse <?= ($active=='absensi_qr' || $active=='laporan_absensi_qr') ? 'show' : '' ?>">
+
+    <div id="mAbsensiQR" class="collapse <?= $group_absenqr ? 'show' : '' ?>">
         <div class="bg-white py-2 collapse-inner rounded">
 
             <a class="collapse-item <?= $active=='absensi_qr'?'active':'' ?>" 
-               href="<?= base_url('index.php/AbsensiQRAdmin') ?>">Absensi QR Siswa</a>
+               href="<?= base_url('index.php/AbsensiQRAdmin') ?>">
+                Absensi QR Siswa
+            </a>
 
             <a class="collapse-item <?= $active=='laporan_absensi_qr'?'active':'' ?>" 
                href="<?= base_url('index.php/AbsensiQRAdmin/laporan') ?>">
-               Laporan Absensi QR
+                Laporan Absensi QR
             </a>
 
         </div>
     </div>
+
 </li>
 
 
@@ -136,7 +142,7 @@ $group_setting = in_array($active, ['hari_libur','tahun']);
                 href="<?= site_url('tahun') ?>">Tahun Ajaran</a>
             <a class="collapse-item <?= $active=='jadwal_absensi'?'active':'' ?>" 
                 href="<?= base_url('index.php/jadwalabsensi') ?>">
-                Pengaturan Jam Absensi
+                Setting Jam Absen
             </a>
         </div>
     </div>
