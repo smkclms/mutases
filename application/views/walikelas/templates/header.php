@@ -23,17 +23,25 @@
    LIGHT MODE
    =============================== */
 body.light-mode {
-    background-color: #f0f4ff !important;
+    background-color: #e0f5e0ff !important;
     color: #1a1a1a !important;
 }
 
 body.light-mode .card {
     background: white !important;
-    border: 1px solid #dce4ff !important;
+    border: 1px solid #1e0cdbff !important;
 }
 
 body.light-mode .topbar {
-    background: #f9fbff !important;
+    background-color: #e0f5e0ff !important;
+}
+
+body.light-mode .topbar .nav-link {
+    color: #1a1a1a !important;
+}
+
+body.dark-mode .topbar .nav-link {
+    color: #e0f5e0ff!important;
 }
 
 /* ===============================

@@ -113,6 +113,7 @@ class Walikelas extends CI_Controller {
         $data['active']     = "walikelas_dashboard";
 
         // load view
+        
         $this->load->view('walikelas/templates/header', $data);
         $this->load->view('walikelas/templates/sidebar', $data);
         $this->load->view('walikelas/dashboard', $data);

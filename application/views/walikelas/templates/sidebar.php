@@ -1,4 +1,63 @@
 <!-- ================= SIDEBAR WALIKELAS ================= -->
+ <style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden !important; /* supaya hanya content yg scroll */
+}
+
+/* SIDEBAR — scroll sendiri */
+#accordionSidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    width: 224px; /* ukuran bawaan SB Admin */
+    z-index: 1032;
+}
+
+/* CONTENT — scroll sendiri */
+#content-wrapper {
+    margin-left: 224px;
+    height: 100vh;
+    overflow-y: auto;
+    padding-top: 70px; /* memberi ruang untuk topbar yg fixed */
+}
+
+/* TOPBAR (karena kamu buat fixed) */
+.topbar {
+    position: fixed !important;
+    top: 0;
+    left: 224px;
+    right: 0;
+    z-index: 1031;
+}
+/* KETIKA SIDEBAR DI-COLLAPSE */
+.sidebar-toggled #accordionSidebar {
+    width: 80px !important; /* ukuran kecil */
+}
+
+.sidebar-toggled #content-wrapper {
+    margin-left: 80px !important;
+}
+
+.sidebar-toggled .topbar {
+    left: 80px !important;
+}
+
+/* Animasi biar smooth */
+#accordionSidebar,
+#content-wrapper,
+.topbar {
+    transition: all 0.25s ease-in-out;
+}
+
+.topbar.navbar {
+    background-color: #28a745 !important;
+}
+
+ </style>
 
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -69,22 +128,30 @@
 </ul>
 
 <!-- ========== TOPBAR ========== -->
-<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow"
+<nav class="navbar navbar-expand navbar-dark bg-success topbar mb-4 static-top shadow"
      style="position: fixed; top: 0; left: 224px; right: 0; z-index: 1031;">
 
-    <button id="toggleMode" class="btn btn-sm btn-outline-secondary mr-3">
-        <i class="fas fa-moon"></i>
-    </button>
 
     <ul class="navbar-nav ml-auto align-items-center">
+
+        <!-- Tombol Dark Mode ke kanan -->
+        <li class="nav-item mr-3">
+            <button id="toggleMode" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-moon"></i>
+            </button>
+        </li>
+
+        <!-- Nama User -->
         <li class="nav-item dropdown no-arrow">
             <span class="nav-link text-gray-800">
                 <?= $this->session->userdata('nama'); ?> |
                 <strong>Wali Kelas <?= $this->session->userdata('kelas_nama'); ?></strong>
             </span>
         </li>
+
     </ul>
 </nav>
+
 <!-- ============================ -->
 
 <!-- Content Wrapper -->

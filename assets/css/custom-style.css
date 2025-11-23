@@ -463,3 +463,62 @@ body.light-mode .sidebar .collapse-inner .collapse-item.active {
 	background-color: rgba(255, 255, 255, 0.35) !important;
 	color: #fff !important;
 }
+/* ===============================
+   FINAL FIX SIDEBAR & TOGGLE
+   =============================== */
+
+/* Fix body supaya konten yang scroll, bukan body */
+html,
+body {
+	height: 100%;
+	overflow: hidden !important;
+}
+
+/* Sidebar selalu fixed */
+#accordionSidebar {
+	width: 224px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	overflow-y: auto;
+	transition: width 0.25s ease;
+	z-index: 1031;
+}
+
+/* Content wrapper mengikuti posisi sidebar */
+#content-wrapper {
+	margin-left: 224px;
+	height: 100vh;
+	overflow-y: auto;
+	padding-top: 80px; /* ruang topbar */
+	transition: margin-left 0.25s ease;
+}
+
+/* Topbar fixed ikut geser */
+.topbar {
+	position: fixed !important;
+	top: 0;
+	left: 224px;
+	right: 0;
+	z-index: 1040;
+	transition: left 0.25s ease;
+}
+
+/* Saat sidebar COLLAPSE */
+.sidebar.toggled {
+	width: 80px !important;
+}
+
+/* Content ikut geser saat collapse */
+.sidebar.toggled ~ #content-wrapper {
+	margin-left: 80px !important;
+}
+
+/* Topbar ikut geser juga */
+.sidebar.toggled ~ .topbar {
+	left: 80px !important;
+}
+.topbar.bg-success {
+	background-color: #28a745 !important;
+}
