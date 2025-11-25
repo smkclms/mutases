@@ -87,17 +87,30 @@ if ($cekLibur || $isWeekend) {
         // ============================
         if (!$absen) {
 
-            $status = (strtotime($jamNow) <= strtotime($jamMasukResmi)) 
-                ? "Tepat" 
-                : "Terlambat";
+            if (strtotime($jamNow) <= strtotime($jamMasukResmi)) {
+    $status = "Tepat";
+    $keterangan_telat = null;
+} else {
+    $status = "Terlambat";
+
+    // hitung detik keterlambatan
+    $telat_detik = strtotime($jamNow) - strtotime($jamMasukResmi);
+
+    // format seperti "1 jam 5 menit 1 detik"
+    $keterangan_telat = $this->format_telat($telat_detik);
+}
+
 
             $insert = [
-                'nis'        => $nis,
-                'tanggal'    => $tanggal,
-                'jam_masuk'  => $jamNow,
-                'status'     => $status,
-                'kehadiran'  => 'H'
-            ];
+    'nis'               => $nis,
+    'tanggal'           => $tanggal,
+    'jam_masuk'         => $jamNow,
+    'status'            => $status,
+    'kehadiran'         => 'H',
+    'keterangan_telat'  => $keterangan_telat,
+    'sumber'            => 'scan_qr'
+];
+
             $this->qr->insert_absen_masuk($insert);
 
             $this->load->view('absensiqr/hasil', [
@@ -170,7 +183,20 @@ public function index()
     $data['judul'] = "Absensi QR";
 
     // Ambil data absen + join siswa + kelas
-    $this->db->select("a.*, s.nama AS nama_siswa, k.nama AS nama_kelas");
+    $this->db->select("
+    a.id,
+    a.nis,
+    a.tanggal,
+    a.jam_masuk,
+    a.jam_pulang,
+    a.status,
+    a.kehadiran,
+    a.keterangan_telat,
+    a.sumber,
+    s.nama AS nama_siswa,
+    k.nama AS nama_kelas
+");
+
     $this->db->from("absensi_qr a");
     $this->db->join("siswa s", "s.nis = a.nis", "left");
     $this->db->join("kelas k", "k.id = s.id_kelas", "left");
@@ -246,6 +272,21 @@ public function ajax_siswa()
     $data = $this->db->get()->result();
 
     echo json_encode($data);
+}
+// hitung keterlambatan siswa ketika hadir tapi telat
+private function format_telat($total_detik)
+{
+    $jam = floor($total_detik / 3600);
+    $menit = floor(($total_detik % 3600) / 60);
+    $detik = $total_detik % 60;
+
+    $hasil = [];
+
+    if ($jam > 0)   $hasil[] = $jam . ' jam';
+    if ($menit > 0) $hasil[] = $menit . ' menit';
+    if ($detik > 0) $hasil[] = $detik . ' detik';
+
+    return implode(' ', $hasil);
 }
 
 }

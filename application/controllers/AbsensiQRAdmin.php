@@ -36,6 +36,7 @@ class AbsensiQRAdmin extends CI_Controller {
         q.jam_pulang,
         q.status,
         q.kehadiran,
+        q.keterangan_telat,
         s.nama as nama_siswa,
         k.nama as nama_kelas
     ");
@@ -83,6 +84,7 @@ class AbsensiQRAdmin extends CI_Controller {
             q.jam_pulang,
             q.status,
             q.kehadiran,
+            q.keterangan_telat,
             s.nama as nama_siswa,
             k.nama as nama_kelas
         ");

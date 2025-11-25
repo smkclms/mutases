@@ -72,7 +72,16 @@ $warna = isset($warna_badge[$a->kehadiran]) ? $warna_badge[$a->kehadiran] : 'bad
     <?= $label ?>
 </span>
 <br>
-<small><?= $a->status ?></small>
+
+<!-- STATUS KETERANGAN -->
+<small>
+    <?= $a->status ?>
+<?php if ($a->status == 'Terlambat' && !empty($a->keterangan_telat)): ?>
+    <small class="text-warning">(<?= $a->keterangan_telat ?>)</small>
+<?php endif; ?>
+
+</small>
+
 
             </td>
 
