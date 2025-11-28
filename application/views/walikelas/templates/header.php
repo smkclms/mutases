@@ -29,11 +29,11 @@ body.light-mode {
 
 body.light-mode .card {
     background: white !important;
-    border: 1px solid #1e0cdbff !important;
+    border: 1px solid #0e86f6ff !important;
 }
 
 body.light-mode .topbar {
-    background-color: #e0f5e0ff !important;
+    background-color: #ffffffff !important;
 }
 
 body.light-mode .topbar .nav-link {
@@ -41,7 +41,7 @@ body.light-mode .topbar .nav-link {
 }
 
 body.dark-mode .topbar .nav-link {
-    color: #e0f5e0ff!important;
+    color: #df480cff!important;
 }
 
 /* ===============================

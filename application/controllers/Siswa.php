@@ -195,7 +195,8 @@ $this->db->where('id', $id_siswa)->update('siswa', ['token_qr' => $token]);
             'alamat' => $this->input->post('alamat', TRUE),
             'id_kelas' => $this->input->post('id_kelas', TRUE),
             'tahun_id' => $this->input->post('tahun_id', TRUE),
-            'status' => $this->input->post('status', TRUE)
+            'status' => $this->input->post('status', TRUE),
+            'no_hp_ortu' => $this->input->post('no_hp_ortu'),
         ];
 
         // ============================================

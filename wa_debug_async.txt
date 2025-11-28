@@ -1,0 +1,25 @@
+ASYNC -> KE: 6285651414221 | Pesan: Assalamualaikum, Orang tua/wali dari *AA AZIZUL JABBAR*.
+
+Ananda telah *HADIR* melalui *RFID*.
+⏰ Jam: *20:58:41*
+📅 Tanggal: *2025-11-27*
+📌 Status: *Terlambat*
+⏱️ Keterlambatan: _14 jam 28 menit 41 detik_
+
+Terima kasih.
+ASYNC -> KE: 6285651414221 | Pesan: Assalamualaikum, Orang tua/wali dari *AA AZIZUL JABBAR*.
+
+Ananda telah *PULANG* melalui *RFID*.
+⏰ Jam Pulang: *21:11:08*
+📅 Tanggal: *2025-11-27*
+
+Terima kasih.
+ASYNC -> KE: 6285651414221 | Pesan: Assalamualaikum, Orang tua/wali dari *AA AZIZUL JABBAR*.
+
+Ananda telah *HADIR* melalui *RFID*.
+⏰ Jam: *21:16:56*
+📅 Tanggal: *2025-11-27*
+📌 Status: *Terlambat*
+⏱️ Keterlambatan: _14 jam 46 menit 56 detik_
+
+Terima kasih.

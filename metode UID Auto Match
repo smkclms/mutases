@@ -1,0 +1,8 @@
+registrasikan dulu seluruh kartu di laman
+http://localhost:90/mutases/index.php/rfid/auto
+
+kartu yg sudah di scan/regist maka akan muncul semu di laman pending
+http://localhost:90/mutases/index.php/rfid/pending
+
+lanjutkan match antara UID dengan siswa pada laman match
+http://localhost:90/mutases/index.php/rfid/match

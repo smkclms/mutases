@@ -2,13 +2,8 @@
 
 function send_wa($number, $message)
 {
-    // ===== LOG DEBUG ====================================
-    file_put_contents(FCPATH . "wa_debug.txt",
-        "KIRIM KE: $number | Pesan: $message\n", FILE_APPEND);
-    // =====================================================
-
-    $url = "http://192.168.110.250:3000/send";
-    $token = "RAHASIA-123";
+    $url = "https://waapi.smkn1cilimus.my.id/send"; // IP server WA kamu
+    $token = "RAHASIA-123"; // token API dari node
 
     $data = array(
         "number" => $number,
@@ -27,13 +22,7 @@ function send_wa($number, $message)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
     $result = curl_exec($ch);
-    $error = curl_error($ch); // <-- ambil error
     curl_close($ch);
-
-    // ===== LOG DEBUG ====================================
-    file_put_contents(FCPATH . "wa_debug.txt",
-        "HASIL CURL: $result | ERROR: $error\n\n", FILE_APPEND);
-    // =====================================================
 
     return $result;
 }

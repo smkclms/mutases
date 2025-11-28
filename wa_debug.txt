@@ -22,3 +22,32 @@ Ananda telah *HADIR* melalui *RFID*.
 📌 Status: *Terlambat*
 HASIL CURL: GAGAL | ERROR: 
 
+KIRIM KE: 6285651414221 | Pesan: Assalamualaikum, Orang tua/wali dari *AA AZIZUL JABBAR*.
+
+Ananda telah *HADIR* melalui *RFID*.
+⏰ Jam: *20:47:09*
+📅 Tanggal: *2025-11-27*
+📌 Status: *Terlambat*
+⏱️ Keterlambatan: _14 jam 17 menit 9 detik_
+
+Terima kasih.
+HASIL CURL:  | ERROR: Failed to connect to 192.168.110.250 port 3000: Timed out
+
+KIRIM KE: 6285651414221 | Pesan: Assalamualaikum, Orang tua/wali dari *AA AZIZUL JABBAR*.
+
+Ananda telah *PULANG* melalui *RFID*.
+⏰ Jam Pulang: *20:47:39*
+📅 Tanggal: *2025-11-27*
+
+Terima kasih.
+HASIL CURL:  | ERROR: Failed to connect to 192.168.110.250 port 3000: Timed out
+
+KIRIM KE: 6285651414221 | Pesan: Assalamualaikum, Orang tua/wali dari *AA AZIZUL JABBAR*.
+
+Ananda telah *PULANG* melalui *RFID*.
+⏰ Jam Pulang: *21:34:39*
+📅 Tanggal: *2025-11-27*
+
+Terima kasih.
+HASIL CURL:  | ERROR: Failed to connect to 192.168.110.250 port 3000: Timed out
+

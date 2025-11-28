@@ -232,4 +232,13 @@ class RfidAbsensi extends CI_Controller {
 
         return implode(' ', $hasil);
     }
+    public function scan_real()
+{
+    $this->load->view('rfid/scan_real');
+}
+public function test_reader()
+{
+    $this->load->view('rfid/test_reader');
+}
+
 }

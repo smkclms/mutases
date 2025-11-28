@@ -65,6 +65,10 @@
         <label>Alamat</label>
         <textarea name="alamat" class="form-control" rows="2"><?= $siswa->alamat ?></textarea>
       </div>
+      <div class="form-group">
+  <label>No Hp Ortu/Wali</label>
+  <textarea name="no_hp_ortu" class="form-control" rows="2"><?= $siswa->no_hp_ortu ?></textarea>
+</div>
 
       <div class="form-row">
         <div class="form-group col-md-4">
